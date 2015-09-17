@@ -16,10 +16,10 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="600dp"
+        android:layout_height="600dp"
         android:scaleType="matrix"
         android:layout_below="@+id/pinchTitleText"
-        android:src="@drawable/map"/>
+        android:src="@drawable/vectordrawable"/>
 
 </RelativeLayout>

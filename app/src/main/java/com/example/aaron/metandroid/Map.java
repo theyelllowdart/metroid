@@ -3,6 +3,8 @@ package com.example.aaron.metandroid;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.graphics.Matrix;
+import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,18 +20,19 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 
 
 public class Map extends Activity {
-    private ImageView imageView;
-    private ScaleGestureDetector scaleGestureDetector;
-    private PhotoViewAttacher mAttacher;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
-        imageView = (ImageView) findViewById(R.id.imageView);
-//        scaleGestureDetector = new ScaleGestureDetector(this,new ScaleListener());
-        mAttacher = new PhotoViewAttacher(imageView);
+        ImageView imageView = (ImageView) findViewById(R.id.imageView);
+        new PhotoViewAttacher(imageView);
+        VectorDrawable drawable = (VectorDrawable) imageView.getDrawable().mutate();
+        try {
+            new VectorDrawableExtension(drawable).setFillAlpha("myPath", 0.1f);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -59,20 +62,4 @@ public class Map extends Activity {
 
         return super.onOptionsItemSelected(item);
     }
-
-//    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
-//        private Matrix matrix = new Matrix();
-//        private Float scaleFactor = 1.f;
-//
-//        @Override
-//        public boolean onScale(ScaleGestureDetector detector) {
-//            scaleFactor *= detector.getScaleFactor();
-//            // Don't let the object get too small or too large.
-//            scaleFactor = Math.max(0.1f, Math.min(scaleFactor, 5.0f));
-//            Log.i("ScaleListener", scaleFactor.toString());
-//            matrix.setScale(scaleFactor, scaleFactor);
-//            imageView.setImageMatrix(matrix);
-//            return true;
-//        }
-//    }
 }
