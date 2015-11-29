@@ -8,12 +8,17 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context=".Map">
 
-    <ImageView
+    <com.example.aaron.metandroid.DebugMapView
         android:id="@+id/imageView"
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:scaleType="matrix"
         android:src="@drawable/map"/>
+
+    <!--<com.example.aaron.metandroid.DebugMapView-->
+        <!--android:id="@+id/overlay"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="300dp" />-->
 
     <ListView
         android:id="@+id/listView"
