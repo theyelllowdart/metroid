@@ -1,13 +1,11 @@
 package com.example.aaron.metandroid;
 
 import android.app.Activity;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,15 +14,11 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.MediaController;
-import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -33,14 +27,11 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 
-
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 
-import nl.changer.audiowife.AudioWife;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 
@@ -57,6 +48,9 @@ public class Map extends Activity {
         (TextView) findViewById(R.id.time),
         (TextView) findViewById(R.id.audioTitle)
     );
+
+    final PhotoViewAttacher largeMapView = new PhotoViewAttacher((DebugMapView) findViewById(R.id.largeMap));
+    largeMapView.setMaximumScale(7.0f);
 
     final ListView listView = (ListView) findViewById(R.id.listView);
     final Float density = getResources().getDisplayMetrics().density;
@@ -113,7 +107,11 @@ public class Map extends Activity {
         holder.titleView.setText(model.getTitle());
         holder.imageView.getLayoutParams().height = LinearLayout.LayoutParams.WRAP_CONTENT;
         // scroll to center of gallery
-        holder.mapView.scrollTo(300, 300);
+//        GalleryViewRect rect = MyApplication.galleryRectById.get(model.getGalleryId());
+//        Rect r = new Rect();
+//        rect.getTransformed().round(r);
+//        holder.mapView.requestRectangleOnScreen(r);
+        holder.mapView.scrollTo(500, 500);
         holder.mapView.invalidate();
 
         Glide.with(activity).load(model.getImageURL()).transform(new BitmapTransformation(activity) {
@@ -163,29 +161,16 @@ public class Map extends Activity {
     };
     listView.setAdapter(listAdapter);
 
-    final DebugMapView imageView = (DebugMapView) findViewById(R.id.imageView);
-    final PhotoViewAttacher photoView = new PhotoViewAttacher(imageView);
-    photoView.setMaximumScale(7.0f);
-
     final TextView galleryHeader = (TextView) findViewById(R.id.galleryHeader);
 
-    // TODO(aaron): Put this into a data verification test
-    for (GalleryViewRect rect1 : imageView.rects) {
-      for (GalleryViewRect rect2 : imageView.rects) {
-        if (rect2.getOriginal().intersect(rect1.getOriginal()) && rect1.getId() != rect2.getId()) {
-          throw new RuntimeException("intersecting shapes " + rect1.getId() + " " + rect2.getId());
-        }
-      }
-    }
-
-    photoView.setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
+    largeMapView.setOnViewTapListener(new PhotoViewAttacher.OnViewTapListener() {
       @Override
       public void onViewTap(View view, float v, float v1) {
         Matrix matrix = new Matrix();
-        photoView.getDisplayMatrix().invert(matrix);
+        largeMapView.getDisplayMatrix().invert(matrix);
         float[] coordinates = new float[]{v, v1};
         matrix.mapPoints(coordinates);
-        matrix.postScale(photoView.getScale(), photoView.getScale());
+        matrix.postScale(largeMapView.getScale(), largeMapView.getScale());
         matrix.postTranslate(v, v1);
         float realX = coordinates[0] / density;
         float realY = coordinates[1] / density;
@@ -193,7 +178,7 @@ public class Map extends Activity {
 
 
         listAdapter.clear();
-        for (GalleryViewRect rect : imageView.rects) {
+        for (GalleryViewRect rect : MyApplication.galleryRectById.values()) {
           if (rect.getOriginal().contains(realX, realY)) {
             galleryHeader.setText("Gallery " + rect.getId());
             SQLiteDatabase db = new FeedReaderDbHelper(getApplicationContext()).getReadableDatabase();
@@ -231,7 +216,7 @@ public class Map extends Activity {
               }
               ArrayList<StopModel> stopModels = new ArrayList<>();
               for (ArrayList<QueryModel> qs : modelsByObjectId.values()) {
-                StopModel stopModel = new StopModel(qs.get(0).getTitle(), qs.get(0).getImageURL());
+                StopModel stopModel = new StopModel(rect.getId(), qs.get(0).getTitle(), qs.get(0).getImageURL());
                 for (QueryModel q : qs) {
                   stopModel.addMedia(new MediaModel(q.getMediaTitle(), q.getMediaURL(), q.getStopId()));
                 }
