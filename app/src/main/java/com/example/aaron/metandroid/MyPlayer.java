@@ -48,16 +48,20 @@ public class MyPlayer {
     this.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
       @Override
       public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        int progressMinutes = progress / 60000;
-        int progressSeconds = progress % 60000 / 1000;
+        if (isPrepared) {
+          int progressMinutes = progress / 60000;
+          int progressSeconds = progress % 60000 / 1000;
 
-        //Set this once in the beginning
-        int durationMinutes = mediaPlayer.getDuration() / 60000;
-        int durationSeconds = mediaPlayer.getDuration() % 60000 / 1000;
+          //Set this once in the beginning
+          int durationMinutes = mediaPlayer.getDuration() / 60000;
+          int durationSeconds = mediaPlayer.getDuration() % 60000 / 1000;
 
-        String formatted = String.format("%02d:%02d/%02d:%02d",
-            progressMinutes, progressSeconds, durationMinutes, durationSeconds);
-        timeView.setText(formatted);
+          String formatted = String.format("%02d:%02d/%02d:%02d",
+              progressMinutes, progressSeconds, durationMinutes, durationSeconds);
+          timeView.setText(formatted);
+        } else {
+          seekBar.setProgress(0);
+        }
       }
 
       @Override
@@ -67,7 +71,9 @@ public class MyPlayer {
 
       @Override
       public void onStopTrackingTouch(SeekBar seekBar) {
-        mediaPlayer.seekTo(seekBar.getProgress());
+        if (isPrepared) {
+          mediaPlayer.seekTo(seekBar.getProgress());
+        }
         isSeekBarDragging = false;
       }
     });

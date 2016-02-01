@@ -29,6 +29,7 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:text="Select a Gallery"
+      android:background="@android:color/white"
       android:textStyle="bold" />
 
     <ListView
@@ -40,17 +41,17 @@
   </LinearLayout>
 
   <LinearLayout
-    android:background="@android:color/holo_blue_dark"
+    android:background="@color/lightGray"
     android:layout_width="match_parent"
     android:layout_height="0dip"
     android:layout_weight=".1"
+    android:gravity="center_horizontal"
     android:orientation="horizontal">
 
     <Button
       android:id="@+id/play"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_weight="0"
       android:text="Play" />
 
 
@@ -62,8 +63,8 @@
 
       <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:layout_weight=".5">
+        android:layout_height="wrap_content"
+        android:layout_weight="0">
 
         <TextView
           android:id="@+id/audioTitle"
@@ -83,8 +84,8 @@
       <SeekBar
         android:id="@+id/seek"
         android:layout_width="match_parent"
-        android:layout_height="0dip"
-        android:layout_weight=".5" />
+        android:layout_height="wrap_content"
+        style="@android:style/Widget.Holo.Light.SeekBar"/>
 
     </LinearLayout>
 
