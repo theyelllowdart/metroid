@@ -1,62 +1,101 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:paddingStart="1dp"
+  android:paddingEnd="1dp"
+  android:paddingTop="5dp"
+  android:orientation="vertical">
 
+  <View
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:background="@android:color/darker_gray" />
+
+  <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
 
     <ImageView
-        android:id="@+id/objectImage"
-        android:background="@android:color/darker_gray"
-        android:layout_width="75dp"
-        android:layout_height="75dp"/>
+      android:id="@+id/objectImage"
+      android:layout_width="50dp"
+      android:layout_height="50dp"
+      android:layout_weight="0"
+      android:layout_marginEnd="5dp"
+      android:background="@android:color/darker_gray"
+      android:contentDescription="!" />
 
     <LinearLayout
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:orientation="vertical">
+
+      <TextView
+        android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            />
-        <TextView
-            android:id="@+id/audio0"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            />
-        <TextView
-            android:id="@+id/audio1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            />
-        <TextView
-            android:id="@+id/audio2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            />
-        <TextView
-            android:id="@+id/audio3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            />
-        <TextView
-            android:id="@+id/audio4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            />
-        <TextView
-            android:id="@+id/audio5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:visibility="gone"
-            />
+        android:textStyle="bold" />
+
+
+      <TextView
+        android:id="@+id/audio0"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+      <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray" />
+
+
+      <TextView
+        android:id="@+id/audio1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+      <TextView
+        android:id="@+id/audio2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+      <TextView
+        android:id="@+id/audio3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+      <TextView
+        android:id="@+id/audio4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+      <TextView
+        android:id="@+id/audio5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
     </LinearLayout>
 
+    <ImageView
+      android:id="@+id/mapView"
+      android:layout_width="50dp"
+      android:layout_height="50dp"
+      android:layout_marginStart="5dp"
+      android:layout_weight="0"
+      android:scaleType="matrix"
+      android:src="@drawable/map" />
+  </LinearLayout>
+
+  <View
+    android:layout_width="match_parent"
+    android:layout_height="1dp"
+    android:background="@android:color/darker_gray" />
 
 
 </LinearLayout>
