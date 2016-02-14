@@ -2,6 +2,8 @@ package com.example.aaron.metandroid;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -57,27 +59,71 @@ public class DebugMapView extends ImageView {
   @Override
   public void onDraw(Canvas canvas) {
     super.onDraw(canvas);
-    for (int i = 0; i < rects.size(); i++) {
-      final Paint paint = paints.get(i);
-      final GalleryViewRect galleryViewRect = rects.get(i);
-
-      final RectF scaled = galleryViewRect.getScaled();
-      final RectF transformed = galleryViewRect.getTransformed();
-      getImageMatrix().mapRect(transformed, scaled);
-      canvas.drawRect(transformed, paint);
-    }
-    Path path = new Path();
     final float density = getResources().getDisplayMetrics().density;
-    path.moveTo(321 * density, 62 * density);
-    path.lineTo(309 * density, 50 * density);
-    path.lineTo(318 * density, 41 * density);
-    path.lineTo(331 * density, 53 * density);
-    path.close();
+
+    float[] f = new float[9];
+    getImageMatrix().getValues(f);
+
+    Paint paint = new Paint();
+    paint.setColor(Color.WHITE);
+    paint.setStyle(Paint.Style.FILL);
+    paint.setTextSize((int) (8 * density * f[Matrix.MSCALE_X]));
+    paint.setTextAlign(Paint.Align.CENTER);
+    paint.setAntiAlias(true);
 
 
-    Path transformedPath = new Path();
-    path.transform(getImageMatrix(), transformedPath);
-    canvas.drawPath(transformedPath, paints.get(0));
+    RectF clipBounds = new RectF(canvas.getClipBounds());
+
+    for (int i = 0; i < rects.size(); i++) {
+      //final Paint paint = paints.get(i);
+      final GalleryViewRect rect = rects.get(i);
+
+      final RectF scaled = rect.getScaled();
+      final RectF transformed = rect.getTransformed();
+      getImageMatrix().mapRect(transformed, scaled);
+      //canvas.drawRect(transformed, paint);
+
+//
+//
+//
+//
+//      float[] src = new float[]{100.0f, 100.0f};
+//      float[] dest = new float[]{100.0f, 100.0f};
+//      getImageMatrix().mapPoints(dest, src);
+
+      if (RectF.intersects(transformed, clipBounds)) {
+        canvas.drawText(
+            String.valueOf(rect.getId()),
+            rect.getTransformed().centerX(),
+            rect.getTransformed().centerY(),
+            paint
+        );
+      }
+
+
+    }
+
+    // gallery number
+    {
+
+
+    }
+
+
+    // Polygon test
+    {
+      Path path = new Path();
+      path.moveTo(321 * density, 62 * density);
+      path.lineTo(309 * density, 50 * density);
+      path.lineTo(318 * density, 41 * density);
+      path.lineTo(331 * density, 53 * density);
+      path.close();
+
+
+      Path transformedPath = new Path();
+      path.transform(getImageMatrix(), transformedPath);
+      canvas.drawPath(transformedPath, paints.get(0));
+    }
   }
 
   private class Polygon {
