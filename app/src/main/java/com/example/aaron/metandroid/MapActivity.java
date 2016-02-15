@@ -6,8 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -34,7 +32,7 @@ import java.util.HashMap;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 
-public class Map extends Activity {
+public class MapActivity extends Activity {
 
   private Float density;
   private MyPlayer myPlayer;
@@ -58,7 +56,7 @@ public class Map extends Activity {
         (TextView) findViewById(R.id.audioTitle)
     );
 
-    largeMapView = new PhotoViewAttacher((DebugMapView) findViewById(R.id.largeMap));
+    largeMapView = new PhotoViewAttacher((LargeMapView) findViewById(R.id.largeMap));
     largeMapView.setMaximumScale(7.0f);
 
     galleriesView = (ListView) findViewById(R.id.listView);
@@ -73,20 +71,17 @@ public class Map extends Activity {
   private class OnMapTap implements PhotoViewAttacher.OnViewTapListener {
     @Override
     public void onViewTap(View view, float v, float v1) {
+      galleryAdapter.clear();
+
       Matrix matrix = new Matrix();
       largeMapView.getDisplayMatrix().invert(matrix);
       float[] coordinates = new float[]{v, v1};
       matrix.mapPoints(coordinates);
-      matrix.postScale(largeMapView.getScale(), largeMapView.getScale());
-      matrix.postTranslate(v, v1);
-      float realX = coordinates[0] / density;
-      float realY = coordinates[1] / density;
-      Log.e("tag", realX + " " + realY);
+      Log.i("tag", coordinates[0] / density + " " + coordinates[1] / density);
 
 
-      galleryAdapter.clear();
       for (GalleryViewRect rect : MyApplication.galleryRectById.values()) {
-        if (rect.getOriginal().contains(realX, realY)) {
+        if (rect.contains(coordinates[0], coordinates[1])) {
           galleryHeader.setText("Gallery " + rect.getId());
           SQLiteDatabase db = new FeedReaderDbHelper(getApplicationContext()).getReadableDatabase();
           try (Cursor c = db.rawQuery(
@@ -147,11 +142,11 @@ public class Map extends Activity {
     class GalleryHolder {
       private final TextView titleView;
       private final ImageView imageView;
-      private final ImageView mapView;
+      private final ObjectMapView mapView;
       private final ArrayList<TextView> audioTextViews = new ArrayList<>(6);
       private final ArrayList<View> audioDividers = new ArrayList<>(6);
 
-      public GalleryHolder(TextView titleView, ImageView mapView, ImageView imageView,
+      public GalleryHolder(TextView titleView, ObjectMapView mapView, ImageView imageView,
                            TextView audio0, TextView audio1, TextView audio2, TextView audio3,
                            TextView audio4, TextView audio5, View divider0, View divider1, View divider2, View divider3, View divider4) {
         this.titleView = titleView;
@@ -191,7 +186,7 @@ public class Map extends Activity {
         convertView = LayoutInflater.from(getContext()).inflate(R.layout.gallery, parent, false);
         GalleryHolder holder = new GalleryHolder(
             (TextView) convertView.findViewById(R.id.title),
-            (ImageView) convertView.findViewById(R.id.mapView),
+            (ObjectMapView) convertView.findViewById(R.id.mapView),
             (ImageView) convertView.findViewById(R.id.objectImage),
             (TextView) convertView.findViewById(R.id.audio0),
             (TextView) convertView.findViewById(R.id.audio1),
@@ -199,11 +194,11 @@ public class Map extends Activity {
             (TextView) convertView.findViewById(R.id.audio3),
             (TextView) convertView.findViewById(R.id.audio4),
             (TextView) convertView.findViewById(R.id.audio5),
-            (View) convertView.findViewById(R.id.audioDivider0),
-            (View) convertView.findViewById(R.id.audioDivider1),
-            (View) convertView.findViewById(R.id.audioDivider2),
-            (View) convertView.findViewById(R.id.audioDivider3),
-            (View) convertView.findViewById(R.id.audioDivider4)
+            convertView.findViewById(R.id.audioDivider0),
+            convertView.findViewById(R.id.audioDivider1),
+            convertView.findViewById(R.id.audioDivider2),
+            convertView.findViewById(R.id.audioDivider3),
+            convertView.findViewById(R.id.audioDivider4)
         );
         convertView.setTag(holder);
       }
@@ -212,24 +207,7 @@ public class Map extends Activity {
       holder.imageView.getLayoutParams().height = LinearLayout.LayoutParams.WRAP_CONTENT;
       //scroll to center of gallery
       GalleryViewRect rect = MyApplication.galleryRectById.get(model.getGalleryId());
-//      Matrix m = new Matrix();
-//      RectF drawableRect = new RectF(0, 0,
-//          200,
-//          200);
-//      m.setRectToRect(drawableRect, rect.getOriginal(), Matrix.ScaleToFit.FILL);
-//      holder.mapView.setImageMatrix(m);
-
-//      holder.mapView.getImageMatrix().mapRect(rect.getScaled());
-//      holder.mapView.requestRectangleOnScreen(r);
-//      holder.mapView.setScaleX(2.0f);
-//      holder.mapView.setScaleY(2.0f);
-      int scrollPadding = 0;
-      holder.mapView.scrollTo(
-          Math.max(0, Math.round(rect.getScaled().left - scrollPadding)),
-          Math.max(0, Math.round(rect.getScaled().top - scrollPadding))
-      );
-
-      holder.mapView.invalidate();
+      holder.mapView.setGallery(rect.getScaled());
 
       Glide.with(getContext()).load(model.getImageURL()).transform(new BitmapTransformation(getContext()) {
         @Override

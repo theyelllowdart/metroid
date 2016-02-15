@@ -107,7 +107,7 @@
         android:visibility="gone" />
     </LinearLayout>
 
-    <ImageView
+    <com.example.aaron.metandroid.ObjectMapView
       android:id="@+id/mapView"
       android:layout_width="75dp"
       android:layout_height="75dp"
