@@ -124,7 +124,7 @@ public class LargeMapView extends ImageView {
     TextPaint pinTextPaint = new TextPaint(textPaint);
     pinTextPaint.setColor(Color.RED);
     pinTextPaint.setTextSize(4 * density * imageMatrixValues[Matrix.MSCALE_X]);
-    canvas.drawText("10", finalR.centerX(), finalR.centerY() - halfPinSize/8, pinTextPaint);
+    canvas.drawText("10", finalR.centerX(), finalR.centerY() - halfPinSize / 8, pinTextPaint);
   }
 
   private static class Polygon {

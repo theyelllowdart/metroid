@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -36,10 +37,12 @@ public class MapActivity extends Activity {
 
   private Float density;
   private MyPlayer myPlayer;
-  private PhotoViewAttacher largeMapView;
+  private PhotoViewAttacher largeMapPhotoView;
   private ListView galleriesView;
   private GalleryAdapter galleryAdapter;
   private TextView galleryHeader;
+  private LargeMapView largeMapView;
+  private Matrix originalMapMatrix;
 
 
   @Override
@@ -56,8 +59,9 @@ public class MapActivity extends Activity {
         (TextView) findViewById(R.id.audioTitle)
     );
 
-    largeMapView = new PhotoViewAttacher((LargeMapView) findViewById(R.id.largeMap));
-    largeMapView.setMaximumScale(7.0f);
+    largeMapView = (LargeMapView) findViewById(R.id.largeMap);
+    largeMapPhotoView = new PhotoViewAttacher(largeMapView);
+    largeMapPhotoView.setMaximumScale(100.0f);
 
     galleriesView = (ListView) findViewById(R.id.listView);
     galleryAdapter = new GalleryAdapter(this, android.R.layout.simple_list_item_1);
@@ -65,7 +69,7 @@ public class MapActivity extends Activity {
 
     galleryHeader = (TextView) findViewById(R.id.galleryHeader);
 
-    largeMapView.setOnViewTapListener(new OnMapTap());
+    largeMapPhotoView.setOnViewTapListener(new OnMapTap());
   }
 
   private class OnMapTap implements PhotoViewAttacher.OnViewTapListener {
@@ -74,7 +78,7 @@ public class MapActivity extends Activity {
       galleryAdapter.clear();
 
       Matrix matrix = new Matrix();
-      largeMapView.getDisplayMatrix().invert(matrix);
+      largeMapPhotoView.getDisplayMatrix().invert(matrix);
       float[] coordinates = new float[]{v, v1};
       matrix.mapPoints(coordinates);
       Log.i("tag", coordinates[0] / density + " " + coordinates[1] / density);
@@ -128,6 +132,20 @@ public class MapActivity extends Activity {
             galleryAdapter.addAll(stopModels);
             galleriesView.setSelection(0);
           }
+
+          RectF imageBounds = new RectF(0, 0, largeMapPhotoView.getImageView().getWidth(), largeMapPhotoView.getImageView().getHeight());
+          Matrix m = new Matrix();
+          m.setRectToRect(rect.getScaled(), imageBounds, Matrix.ScaleToFit.CENTER);
+          float[] imageMatrixValues = new float[9];
+          m.getValues(imageMatrixValues);
+          float[] newCenters = new float[2];
+          float[] originalMatrixValues = new float[9];
+          if (originalMapMatrix == null) {
+            originalMapMatrix = largeMapPhotoView.getDisplayMatrix();
+          }
+          originalMapMatrix.mapPoints(newCenters, new float[]{rect.getScaled().centerX(), rect.getScaled().centerY()});
+          originalMapMatrix.getValues(originalMatrixValues);
+          largeMapPhotoView.setScale(imageMatrixValues[Matrix.MSCALE_X] / originalMatrixValues[Matrix.MSCALE_X], newCenters[0], newCenters[1], false);
         }
       }
     }
