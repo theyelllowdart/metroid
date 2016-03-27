@@ -8,6 +8,8 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.VectorDrawable;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
@@ -25,6 +27,7 @@ public class LargeMapView extends ImageView {
   private final RectF galleryBoundsDest = new RectF();
   private final Matrix verticalTextMatrix = new Matrix();
   private final Matrix horizontalTextMatrix = new Matrix();
+  private final VectorDrawable pin;
 
 
   public LargeMapView(Context context, AttributeSet attrs) throws IOException {
@@ -34,7 +37,7 @@ public class LargeMapView extends ImageView {
     textPaint.setColor(Color.WHITE);
     textPaint.setStyle(Paint.Style.FILL);
     textPaint.setTextAlign(Paint.Align.CENTER);
-//    textPaint.setAntiAlias(true);
+    // textPaint.setAntiAlias(true);
 
 
     final Random random = new Random(0);
@@ -43,14 +46,17 @@ public class LargeMapView extends ImageView {
       paint.setColor(random.nextInt());
       paint.setStyle(Paint.Style.FILL);
       paint.setAlpha(90);
-      paintRecs.add(new PaintGallery(rect, paint,  MyApplication.galleryLabels.get(rect.getId())));
+      paintRecs.add(new PaintGallery(rect, paint, MyApplication.galleryLabels.get(rect.getId())));
     }
+
+    this.pin = (VectorDrawable) getResources().getDrawable(R.drawable.pin, null);
   }
 
 
   @Override
   public void onDraw(Canvas canvas) {
     super.onDraw(canvas);
+
     final float density = getResources().getDisplayMetrics().density;
 
     getImageMatrix().getValues(imageMatrixValues);
@@ -89,7 +95,6 @@ public class LargeMapView extends ImageView {
       }
     }
 
-
     // Polygon test
     {
       Path path = new Path();
@@ -104,6 +109,22 @@ public class LargeMapView extends ImageView {
       path.transform(getImageMatrix(), transformedPath);
       //canvas.drawPath(transformedPath, paints.get(0));
     }
+
+    float pointX = 451 * density;
+    float pointY = 279 * density;
+    float halfPinSize = 5 * density;
+    RectF r = new RectF(pointX - halfPinSize, pointY - halfPinSize, pointX + halfPinSize, pointY + halfPinSize);
+    RectF transformedR = new RectF();
+    getImageMatrix().mapRect(transformedR, r);
+    Rect finalR = new Rect();
+    transformedR.round(finalR);
+    pin.setBounds(finalR);
+    pin.draw(canvas);
+
+    TextPaint pinTextPaint = new TextPaint(textPaint);
+    pinTextPaint.setColor(Color.RED);
+    pinTextPaint.setTextSize(4 * density * imageMatrixValues[Matrix.MSCALE_X]);
+    canvas.drawText("10", finalR.centerX(), finalR.centerY() - halfPinSize/8, pinTextPaint);
   }
 
   private static class Polygon {

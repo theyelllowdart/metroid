@@ -253,6 +253,8 @@ public class MapActivity extends Activity {
         }
       }
 
+//      holder.titleView.setOnLongClickListener();
+
       return convertView;
     }
   }
