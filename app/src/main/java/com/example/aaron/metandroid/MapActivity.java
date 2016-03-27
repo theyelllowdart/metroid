@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -106,7 +107,13 @@ public class MapActivity extends Activity {
   private class OnMapTap implements PhotoViewAttacher.OnViewTapListener {
     @Override
     public void onViewTap(View view, float v, float v1) {
+      if (largeMapView.getPinToPlace() != null){
+        return;
+      }
+
       galleryAdapter.clear();
+      largeMapView.clearPins();
+      galleryHeader.setText("Select a Gallery");
 
       Matrix matrix = new Matrix();
       largeMapPhotoView.getDisplayMatrix().invert(matrix);
@@ -359,7 +366,16 @@ public class MapActivity extends Activity {
               db.insertWithOnConflict("object_location", "id", contentValues, SQLiteDatabase.CONFLICT_REPLACE);
               galleryDetail.setVisibility(View.VISIBLE);
               moveButtons.setVisibility(View.GONE);
-              largeMapView.unsetPinToPlace();
+
+              List<ArtObjectLocation> pins = largeMapView.getPins();
+              for (ArtObjectLocation pin: pins) {
+                if (pin.getId() == model.getArtObjectId()) {
+                  pin.setX(coordinates[0]);
+                  pin.setY(coordinates[1]);
+                }
+              }
+              largeMapView.setPins(pins);
+              largeMapView.clearPinToPlace();
             }
           });
           return true;
