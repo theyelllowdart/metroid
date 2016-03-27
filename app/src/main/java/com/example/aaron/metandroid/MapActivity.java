@@ -47,6 +47,9 @@ public class MapActivity extends Activity {
   private TextView galleryHeader;
   private LargeMapView largeMapView;
   private Matrix originalMapMatrix;
+  private LinearLayout galleryDetail;
+  private LinearLayout moveButtons;
+  private LinearLayout mediaLayout;
 
 
   @Override
@@ -74,6 +77,10 @@ public class MapActivity extends Activity {
     galleryHeader = (TextView) findViewById(R.id.galleryHeader);
 
     largeMapPhotoView.setOnViewTapListener(new OnMapTap());
+
+    galleryDetail = (LinearLayout) findViewById(R.id.galleryDetail);
+    moveButtons = (LinearLayout) findViewById(R.id.moveButtons);
+    mediaLayout = (LinearLayout) findViewById(R.id.mediaLayout);
   }
 
   private class OnMapTap implements PhotoViewAttacher.OnViewTapListener {
@@ -240,7 +247,7 @@ public class MapActivity extends Activity {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(final int position, View convertView, ViewGroup parent) {
       StopModel model = getItem(position);
       if (convertView == null) {
         convertView = LayoutInflater.from(getContext()).inflate(R.layout.gallery, parent, false);
@@ -313,10 +320,11 @@ public class MapActivity extends Activity {
       }
 
       holder.titleView.setOnLongClickListener(new OnLongClickListener() {
-
         @Override
         public boolean onLongClick(View v) {
-          int i = 0;
+          galleryDetail.setVisibility(View.GONE);
+          moveButtons.setVisibility(View.VISIBLE);
+          largeMapView.setPinToPlace(position + 1);
           return true;
         }
       });

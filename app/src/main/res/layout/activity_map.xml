@@ -1,14 +1,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:orientation="vertical"
-  android:paddingBottom="@dimen/activity_vertical_margin"
-  android:paddingLeft="@dimen/activity_horizontal_margin"
-  android:paddingRight="@dimen/activity_horizontal_margin"
-  android:paddingTop="@dimen/activity_vertical_margin"
-  android:background="@android:color/white"
-  tools:context=".MapActivity">
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@android:color/white"
+              android:orientation="vertical"
+              android:paddingBottom="@dimen/activity_vertical_margin"
+              android:paddingLeft="@dimen/activity_horizontal_margin"
+              android:paddingRight="@dimen/activity_horizontal_margin"
+              android:paddingTop="@dimen/activity_vertical_margin"
+              tools:context=".MapActivity">
 
   <com.example.aaron.metandroid.LargeMapView
     android:id="@+id/largeMap"
@@ -16,9 +16,10 @@
     android:layout_height="0dip"
     android:layout_weight=".5"
     android:scaleType="matrix"
-    android:src="@drawable/map" />
+    android:src="@drawable/map"/>
 
   <LinearLayout
+    android:id="@+id/galleryDetail"
     android:layout_width="match_parent"
     android:layout_height="0dip"
     android:layout_weight=".4"
@@ -28,23 +29,42 @@
       android:id="@+id/galleryHeader"
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
-      android:text="Select a Gallery"
       android:background="@android:color/white"
-      android:textStyle="bold" />
+      android:text="Select a Gallery"
+      android:textStyle="bold"/>
 
     <ListView
       android:id="@+id/listView"
 
       android:layout_width="match_parent"
-      android:layout_height="match_parent" />
+      android:layout_height="match_parent"/>
 
   </LinearLayout>
 
   <LinearLayout
-    android:background="@color/lightGray"
+    android:id="@+id/moveButtons"
+    android:layout_width="match_parent"
+    android:layout_height="0dip"
+    android:layout_weight=".4"
+    android:visibility="gone"
+    android:orientation="vertical">
+
+    <TextView
+      android:id="@+id/accept"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="@android:color/white"
+      android:text="Accept"
+      android:textStyle="bold"/>
+
+  </LinearLayout>
+
+  <LinearLayout
+    android:id="@+id/mediaLayout"
     android:layout_width="match_parent"
     android:layout_height="0dip"
     android:layout_weight=".1"
+    android:background="@color/lightGray"
     android:gravity="center_horizontal"
     android:orientation="horizontal">
 
@@ -52,7 +72,7 @@
       android:id="@+id/play"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Play" />
+      android:text="Play"/>
 
 
     <LinearLayout
@@ -69,7 +89,7 @@
         <TextView
           android:id="@+id/audioTitle"
           android:layout_width="wrap_content"
-          android:layout_height="wrap_content" />
+          android:layout_height="wrap_content"/>
 
         <TextView
           android:id="@+id/time"
@@ -77,15 +97,15 @@
           android:layout_height="wrap_content"
           android:layout_alignParentRight="true"
           android:gravity="end"
-          android:text="00:00/00:00" />
+          android:text="00:00/00:00"/>
 
       </RelativeLayout>
 
       <SeekBar
         android:id="@+id/seek"
+        style="@android:style/Widget.Holo.Light.SeekBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        style="@android:style/Widget.Holo.Light.SeekBar"/>
+        android:layout_height="wrap_content"/>
 
     </LinearLayout>
 
