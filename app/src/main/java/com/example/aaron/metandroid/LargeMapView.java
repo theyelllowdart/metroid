@@ -27,7 +27,8 @@ public class LargeMapView extends ImageView {
   private final RectF galleryBoundsDest = new RectF();
   private final Matrix verticalTextMatrix = new Matrix();
   private final Matrix horizontalTextMatrix = new Matrix();
-  private final VectorDrawable pin;
+  private final VectorDrawable pinDrawable;
+  private List<ArtObjectLocation> pins = new ArrayList<>();
 
 
   public LargeMapView(Context context, AttributeSet attrs) throws IOException {
@@ -49,9 +50,13 @@ public class LargeMapView extends ImageView {
       paintRecs.add(new PaintGallery(rect, paint, MyApplication.galleryLabels.get(rect.getId())));
     }
 
-    this.pin = (VectorDrawable) getResources().getDrawable(R.drawable.pin, null);
+    this.pinDrawable = (VectorDrawable) getResources().getDrawable(R.drawable.pin, null);
   }
 
+  public void setPins(List<ArtObjectLocation> pins) {
+    this.pins = new ArrayList<>(pins);
+    this.invalidate();
+  }
 
   @Override
   public void onDraw(Canvas canvas) {
@@ -110,21 +115,41 @@ public class LargeMapView extends ImageView {
       //canvas.drawPath(transformedPath, paints.get(0));
     }
 
-    float pointX = 451 * density;
-    float pointY = 279 * density;
-    float halfPinSize = 5 * density;
-    RectF r = new RectF(pointX - halfPinSize, pointY - halfPinSize, pointX + halfPinSize, pointY + halfPinSize);
-    RectF transformedR = new RectF();
-    getImageMatrix().mapRect(transformedR, r);
-    Rect finalR = new Rect();
-    transformedR.round(finalR);
-    pin.setBounds(finalR);
-    pin.draw(canvas);
+    int offset = 0;
+    for (ArtObjectLocation pin : pins) {
+      float pointX = pin.getX() + offset;
+      offset = offset + 20;
+      float pointY = pin.getY();
+      float halfPinSize = 5 * density;
+      RectF r = new RectF(pointX - halfPinSize, pointY - halfPinSize, pointX + halfPinSize, pointY + halfPinSize);
+      RectF transformedR = new RectF();
+      getImageMatrix().mapRect(transformedR, r);
+      Rect finalR = new Rect();
+      transformedR.round(finalR);
+      pinDrawable.setBounds(finalR);
+      pinDrawable.draw(canvas);
 
-    TextPaint pinTextPaint = new TextPaint(textPaint);
-    pinTextPaint.setColor(Color.RED);
-    pinTextPaint.setTextSize(4 * density * imageMatrixValues[Matrix.MSCALE_X]);
-    canvas.drawText("10", finalR.centerX(), finalR.centerY() - halfPinSize / 8, pinTextPaint);
+      TextPaint pinTextPaint = new TextPaint(textPaint);
+      pinTextPaint.setColor(Color.RED);
+      pinTextPaint.setTextSize(4 * density * imageMatrixValues[Matrix.MSCALE_X]);
+      canvas.drawText(String.valueOf(pin.getPosition()), finalR.centerX(), finalR.centerY() - halfPinSize / 8, pinTextPaint);
+    }
+
+//    float pointX = 451 * density;
+//    float pointY = 279 * density;
+//    float halfPinSize = 5 * density;
+//    RectF r = new RectF(pointX - halfPinSize, pointY - halfPinSize, pointX + halfPinSize, pointY + halfPinSize);
+//    RectF transformedR = new RectF();
+//    getImageMatrix().mapRect(transformedR, r);
+//    Rect finalR = new Rect();
+//    transformedR.round(finalR);
+//    pinDrawable.setBounds(finalR);
+//    pinDrawable.draw(canvas);
+//
+//    TextPaint pinTextPaint = new TextPaint(textPaint);
+//    pinTextPaint.setColor(Color.RED);
+//    pinTextPaint.setTextSize(4 * density * imageMatrixValues[Matrix.MSCALE_X]);
+//    canvas.drawText("10", finalR.centerX(), finalR.centerY() - halfPinSize / 8, pinTextPaint);
   }
 
   private static class Polygon {

@@ -62,7 +62,7 @@ public class MapActivity extends Activity {
 
     largeMapView = (LargeMapView) findViewById(R.id.largeMap);
     largeMapPhotoView = new PhotoViewAttacher(largeMapView);
-    largeMapPhotoView.setMaximumScale(100.0f);
+    largeMapPhotoView.setMaximumScale(20f);
 
     galleriesView = (ListView) findViewById(R.id.listView);
     galleryAdapter = new GalleryAdapter(this, android.R.layout.simple_list_item_1);
@@ -106,7 +106,7 @@ public class MapActivity extends Activity {
               String audio = c.getString(c.getColumnIndex("audio"));
               int stop = c.getInt(c.getColumnIndex("stop"));
               int position = c.getInt(c.getColumnIndex("position"));
-              QueryModel model = new QueryModel(title, image, audioTitle, audio, stop, position);
+              QueryModel model = new QueryModel(title, image, audioTitle, audio, stop, position, objectId);
               if (!modelsByObjectId.containsKey(objectId)) {
                 modelsByObjectId.put(objectId, new ArrayList<QueryModel>());
               }
@@ -123,7 +123,7 @@ public class MapActivity extends Activity {
             }
             ArrayList<StopModel> stopModels = new ArrayList<>();
             for (ArrayList<QueryModel> qs : modelsByObjectId.values()) {
-              StopModel stopModel = new StopModel(rect.getId(), qs.get(0).getTitle(), qs.get(0).getImageURL());
+              StopModel stopModel = new StopModel(qs.get(0).getArtObjectId(), rect.getId(), qs.get(0).getTitle(), qs.get(0).getImageURL());
               for (QueryModel q : qs) {
                 stopModel.addMedia(new MediaModel(q.getMediaTitle(), q.getMediaURL(), q.getStopId()));
               }
@@ -132,8 +132,17 @@ public class MapActivity extends Activity {
             Collections.sort(stopModels);
             galleryAdapter.addAll(stopModels);
             galleriesView.setSelection(0);
+
+            // Find pin Locations
+            ArrayList<ArtObjectLocation> pins = new ArrayList<>();
+            for (int i = 0; i < stopModels.size(); i++) {
+              StopModel s = stopModels.get(i);
+              pins.add(new ArtObjectLocation(s.getArtObjectId(), i + 1, rect.getScaled().centerX(), rect.getScaled().centerY()));
+            }
+            largeMapView.setPins(pins);
           }
 
+          // Zoom to gallery on large map
           RectF imageBounds = new RectF(0, 0, largeMapPhotoView.getImageView().getWidth(), largeMapPhotoView.getImageView().getHeight());
           Matrix m = new Matrix();
           m.setRectToRect(rect.getScaled(), imageBounds, Matrix.ScaleToFit.CENTER);
@@ -146,7 +155,12 @@ public class MapActivity extends Activity {
           }
           originalMapMatrix.mapPoints(newCenters, new float[]{rect.getScaled().centerX(), rect.getScaled().centerY()});
           originalMapMatrix.getValues(originalMatrixValues);
-          largeMapPhotoView.setScale(imageMatrixValues[Matrix.MSCALE_X] / originalMatrixValues[Matrix.MSCALE_X], newCenters[0], newCenters[1], false);
+          largeMapPhotoView.setScale(
+              Math.min(largeMapPhotoView.getMaximumScale(), imageMatrixValues[Matrix.MSCALE_X] / originalMatrixValues[Matrix.MSCALE_X]),
+              newCenters[0],
+              newCenters[1],
+              false
+          );
         }
       }
     }
@@ -269,7 +283,7 @@ public class MapActivity extends Activity {
         }
       }
 
-      holder.titleView.setOnLongClickListener(new OnLongClickListener (){
+      holder.titleView.setOnLongClickListener(new OnLongClickListener() {
 
         @Override
         public boolean onLongClick(View v) {
