@@ -115,10 +115,8 @@ public class LargeMapView extends ImageView {
       //canvas.drawPath(transformedPath, paints.get(0));
     }
 
-    int offset = 0;
     for (ArtObjectLocation pin : pins) {
-      float pointX = pin.getX() + offset;
-      offset = offset + 20;
+      float pointX = pin.getX();
       float pointY = pin.getY();
       float halfPinSize = 5 * density;
       RectF r = new RectF(pointX - halfPinSize, pointY - halfPinSize, pointX + halfPinSize, pointY + halfPinSize);

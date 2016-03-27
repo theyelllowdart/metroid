@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
 import android.util.Log;
@@ -25,11 +26,13 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
+import com.google.common.base.Joiner;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -133,13 +136,39 @@ public class MapActivity extends Activity {
             galleryAdapter.addAll(stopModels);
             galleriesView.setSelection(0);
 
+
             // Find pin Locations
-            ArrayList<ArtObjectLocation> pins = new ArrayList<>();
-            for (int i = 0; i < stopModels.size(); i++) {
-              StopModel s = stopModels.get(i);
-              pins.add(new ArtObjectLocation(s.getArtObjectId(), i + 1, rect.getScaled().centerX(), rect.getScaled().centerY()));
+            HashSet<Integer> artObjectIds = new HashSet<>();
+            for (StopModel s : stopModels) {
+              artObjectIds.add(s.getArtObjectId());
             }
-            largeMapView.setPins(pins);
+            if (!artObjectIds.isEmpty()) {
+              try (Cursor locationQuery = db.rawQuery(
+                  "SELECT id, x, y " +
+                      "FROM object_location " +
+                      "WHERE id in (" + Joiner.on(',').join(artObjectIds) + ") ", null)
+              ) {
+                HashMap<Integer, PointF> artObjectIdToPoint = new HashMap<>();
+                while ((locationQuery.moveToNext())) {
+                  int objectId = c.getInt(c.getColumnIndexOrThrow("id"));
+                  float x = c.getFloat(c.getColumnIndexOrThrow("x"));
+                  float y = c.getFloat(c.getColumnIndexOrThrow("y"));
+                  artObjectIdToPoint.put(objectId, new PointF(x, y));
+                }
+                int unsetLocationCount = 0;
+                ArrayList<ArtObjectLocation> pins = new ArrayList<>();
+                for (int i = 0; i < stopModels.size(); i++) {
+                  StopModel s = stopModels.get(i);
+                  PointF point = artObjectIdToPoint.get(s.getArtObjectId());
+                  if (point == null) {
+                    point = new PointF(rect.getScaled().centerX() + 5 * density * unsetLocationCount, rect.getScaled().centerY());
+                    unsetLocationCount++;
+                  }
+                  pins.add(new ArtObjectLocation(s.getArtObjectId(), i + 1, point.x, point.y));
+                }
+                largeMapView.setPins(pins);
+              }
+            }
           }
 
           // Zoom to gallery on large map
