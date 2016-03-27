@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -220,9 +221,6 @@ public class MapActivity extends Activity {
       final GalleryHolder holder = (GalleryHolder) convertView.getTag();
       holder.titleView.setText((position + 1) + ". " + model.getTitle());
       holder.imageView.getLayoutParams().height = LinearLayout.LayoutParams.WRAP_CONTENT;
-      //scroll to center of gallery
-//      GalleryViewRect rect = MyApplication.galleryRectById.get(model.getGalleryId());
-//      holder.mapView.setGallery(rect.getScaled());
 
       Glide.with(getContext()).load(model.getImageURL()).transform(new BitmapTransformation(getContext()) {
         @Override
@@ -271,7 +269,14 @@ public class MapActivity extends Activity {
         }
       }
 
-//      holder.titleView.setOnLongClickListener();
+      holder.titleView.setOnLongClickListener(new OnLongClickListener (){
+
+        @Override
+        public boolean onLongClick(View v) {
+          int i = 0;
+          return true;
+        }
+      });
 
       return convertView;
     }
