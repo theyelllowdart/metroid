@@ -142,15 +142,13 @@ public class MapActivity extends Activity {
     class GalleryHolder {
       private final TextView titleView;
       private final ImageView imageView;
-      private final ObjectMapView mapView;
       private final ArrayList<TextView> audioTextViews = new ArrayList<>(6);
       private final ArrayList<View> audioDividers = new ArrayList<>(6);
 
-      public GalleryHolder(TextView titleView, ObjectMapView mapView, ImageView imageView,
+      public GalleryHolder(TextView titleView, ImageView imageView,
                            TextView audio0, TextView audio1, TextView audio2, TextView audio3,
                            TextView audio4, TextView audio5, View divider0, View divider1, View divider2, View divider3, View divider4) {
         this.titleView = titleView;
-        this.mapView = mapView;
         this.imageView = imageView;
         this.audioTextViews.add(audio0);
         this.audioTextViews.add(audio1);
@@ -186,7 +184,6 @@ public class MapActivity extends Activity {
         convertView = LayoutInflater.from(getContext()).inflate(R.layout.gallery, parent, false);
         GalleryHolder holder = new GalleryHolder(
             (TextView) convertView.findViewById(R.id.title),
-            (ObjectMapView) convertView.findViewById(R.id.mapView),
             (ImageView) convertView.findViewById(R.id.objectImage),
             (TextView) convertView.findViewById(R.id.audio0),
             (TextView) convertView.findViewById(R.id.audio1),
@@ -203,11 +200,11 @@ public class MapActivity extends Activity {
         convertView.setTag(holder);
       }
       final GalleryHolder holder = (GalleryHolder) convertView.getTag();
-      holder.titleView.setText(model.getTitle());
+      holder.titleView.setText((position + 1) + ". " + model.getTitle());
       holder.imageView.getLayoutParams().height = LinearLayout.LayoutParams.WRAP_CONTENT;
       //scroll to center of gallery
-      GalleryViewRect rect = MyApplication.galleryRectById.get(model.getGalleryId());
-      holder.mapView.setGallery(rect.getScaled());
+//      GalleryViewRect rect = MyApplication.galleryRectById.get(model.getGalleryId());
+//      holder.mapView.setGallery(rect.getScaled());
 
       Glide.with(getContext()).load(model.getImageURL()).transform(new BitmapTransformation(getContext()) {
         @Override
