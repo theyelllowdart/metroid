@@ -1,6 +1,7 @@
 package com.example.aaron.metandroid;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -50,7 +51,23 @@ public class MapActivity extends Activity {
   private LinearLayout galleryDetail;
   private LinearLayout moveButtons;
   private LinearLayout mediaLayout;
+  private TextView acceptButton;
 
+  private class MyPhotoViewAttacher extends PhotoViewAttacher{
+
+    public MyPhotoViewAttacher(ImageView imageView) {
+      super(imageView);
+    }
+
+    @Override
+    public void onGlobalLayout() {
+      super.onGlobalLayout();
+      // HACK(aaron): Capture basematrix
+      if (originalMapMatrix == null) {
+        originalMapMatrix = getDisplayMatrix();
+      }
+    }
+  }
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +84,7 @@ public class MapActivity extends Activity {
     );
 
     largeMapView = (LargeMapView) findViewById(R.id.largeMap);
-    largeMapPhotoView = new PhotoViewAttacher(largeMapView);
+    largeMapPhotoView = new MyPhotoViewAttacher(largeMapView);
     largeMapPhotoView.setMaximumScale(20f);
 
     galleriesView = (ListView) findViewById(R.id.listView);
@@ -81,7 +98,10 @@ public class MapActivity extends Activity {
     galleryDetail = (LinearLayout) findViewById(R.id.galleryDetail);
     moveButtons = (LinearLayout) findViewById(R.id.moveButtons);
     mediaLayout = (LinearLayout) findViewById(R.id.mediaLayout);
+    acceptButton = (TextView) findViewById(R.id.accept);
   }
+
+
 
   private class OnMapTap implements PhotoViewAttacher.OnViewTapListener {
     @Override
@@ -150,17 +170,17 @@ public class MapActivity extends Activity {
               artObjectIds.add(s.getArtObjectId());
             }
             if (!artObjectIds.isEmpty()) {
-              try (Cursor locationQuery = db.rawQuery(
+              try (Cursor cl = db.rawQuery(
                   "SELECT id, x, y " +
                       "FROM object_location " +
                       "WHERE id in (" + Joiner.on(',').join(artObjectIds) + ") ", null)
               ) {
                 HashMap<Integer, PointF> artObjectIdToPoint = new HashMap<>();
-                while ((locationQuery.moveToNext())) {
-                  int objectId = c.getInt(c.getColumnIndexOrThrow("id"));
-                  float x = c.getFloat(c.getColumnIndexOrThrow("x"));
-                  float y = c.getFloat(c.getColumnIndexOrThrow("y"));
-                  artObjectIdToPoint.put(objectId, new PointF(x, y));
+                while ((cl.moveToNext())) {
+                  int objectId = cl.getInt(cl.getColumnIndexOrThrow("id"));
+                  float x = cl.getFloat(cl.getColumnIndexOrThrow("x"));
+                  float y = cl.getFloat(cl.getColumnIndexOrThrow("y"));
+                  artObjectIdToPoint.put(objectId, new PointF(x * density, y * density));
                 }
                 int unsetLocationCount = 0;
                 ArrayList<ArtObjectLocation> pins = new ArrayList<>();
@@ -186,9 +206,6 @@ public class MapActivity extends Activity {
           m.getValues(imageMatrixValues);
           float[] newCenters = new float[2];
           float[] originalMatrixValues = new float[9];
-          if (originalMapMatrix == null) {
-            originalMapMatrix = largeMapPhotoView.getDisplayMatrix();
-          }
           originalMapMatrix.mapPoints(newCenters, new float[]{rect.getScaled().centerX(), rect.getScaled().centerY()});
           originalMapMatrix.getValues(originalMatrixValues);
           largeMapPhotoView.setScale(
@@ -248,7 +265,7 @@ public class MapActivity extends Activity {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-      StopModel model = getItem(position);
+      final StopModel model = getItem(position);
       if (convertView == null) {
         convertView = LayoutInflater.from(getContext()).inflate(R.layout.gallery, parent, false);
         GalleryHolder holder = new GalleryHolder(
@@ -325,10 +342,29 @@ public class MapActivity extends Activity {
           galleryDetail.setVisibility(View.GONE);
           moveButtons.setVisibility(View.VISIBLE);
           largeMapView.setPinToPlace(position + 1);
+          acceptButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              PointF pinLocation = largeMapView.getPinLocation();
+              Matrix matrix = new Matrix();
+              largeMapPhotoView.getDisplayMatrix().invert(matrix);
+              float[] coordinates = new float[]{pinLocation.x, pinLocation.y};
+              matrix.mapPoints(coordinates);
+
+              SQLiteDatabase db = new FeedReaderDbHelper(getApplicationContext()).getWritableDatabase();
+              ContentValues contentValues = new ContentValues();
+              contentValues.put("id", model.getArtObjectId());
+              contentValues.put("x", coordinates[0] / density);
+              contentValues.put("y", coordinates[1] / density);
+              db.insertWithOnConflict("object_location", "id", contentValues, SQLiteDatabase.CONFLICT_REPLACE);
+              galleryDetail.setVisibility(View.VISIBLE);
+              moveButtons.setVisibility(View.GONE);
+              largeMapView.unsetPinToPlace();
+            }
+          });
           return true;
         }
       });
-
       return convertView;
     }
   }

@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.VectorDrawable;
@@ -17,7 +18,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class LargeMapView extends ImageView {
-
+  private final float density;
   private final ArrayList<PaintGallery> paintRecs = new ArrayList<>();
   private final Paint textPaint;
   private final float[] imageMatrixValues = new float[9];
@@ -30,10 +31,13 @@ public class LargeMapView extends ImageView {
   private final VectorDrawable pinDrawable;
   private List<ArtObjectLocation> pins = new ArrayList<>();
   private Integer pinToPlace = null;
+  private PointF pinLocation;
 
 
   public LargeMapView(Context context, AttributeSet attrs) throws IOException {
     super(context, attrs);
+
+    density = getResources().getDisplayMetrics().density;
 
     textPaint = new Paint();
     textPaint.setColor(Color.WHITE);
@@ -59,15 +63,23 @@ public class LargeMapView extends ImageView {
     this.invalidate();
   }
 
+  public void unsetPinToPlace() {
+    this.pinToPlace = null;
+    this.invalidate();
+  }
+
   public void setPinToPlace(int pinToPlace) {
     this.pinToPlace = pinToPlace;
+    this.invalidate();
+  }
+
+  public PointF getPinLocation(){
+    return pinLocation;
   }
 
   @Override
   public void onDraw(Canvas canvas) {
     super.onDraw(canvas);
-
-    final float density = getResources().getDisplayMetrics().density;
 
     getImageMatrix().getValues(imageMatrixValues);
     textPaint.setTextSize(8 * density * imageMatrixValues[Matrix.MSCALE_X]);
@@ -124,7 +136,8 @@ public class LargeMapView extends ImageView {
       float pointX = getWidth() / 2.0f;
       float pointY = getHeight() / 2.0f;
       float halfPinSize = 5 * density * imageMatrixValues[Matrix.MSCALE_X];
-      RectF r = new RectF(pointX - halfPinSize, pointY - halfPinSize, pointX + halfPinSize, pointY + halfPinSize);
+      RectF r = new RectF(pointX - halfPinSize, pointY - (2 * halfPinSize), pointX + halfPinSize, pointY);
+      pinLocation = new PointF(r.centerX(), r.bottom);
       Rect finalR = new Rect();
       r.round(finalR);
       pinDrawable.setBounds(finalR);
@@ -139,7 +152,7 @@ public class LargeMapView extends ImageView {
         float pointX = pin.getX();
         float pointY = pin.getY();
         float halfPinSize = 5 * density;
-        RectF r = new RectF(pointX - halfPinSize, pointY - halfPinSize, pointX + halfPinSize, pointY + halfPinSize);
+        RectF r = new RectF(pointX - halfPinSize, pointY - (2 * halfPinSize), pointX + halfPinSize, pointY);
         RectF transformedR = new RectF();
         getImageMatrix().mapRect(transformedR, r);
         Rect finalR = new Rect();
