@@ -86,7 +86,9 @@ public class MapActivity extends Activity {
 
     largeMapView = (LargeMapView) findViewById(R.id.largeMap);
     largeMapPhotoView = new MyPhotoViewAttacher(largeMapView);
-    largeMapPhotoView.setMaximumScale(20f);
+    largeMapPhotoView.setMaximumScale(10f);
+    largeMapPhotoView.setMediumScale(5f);
+
 
     galleriesView = (ListView) findViewById(R.id.listView);
     galleryAdapter = new GalleryAdapter(this, android.R.layout.simple_list_item_1);
