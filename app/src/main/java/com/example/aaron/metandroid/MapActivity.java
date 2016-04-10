@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
@@ -137,7 +136,7 @@ public class MapActivity extends Activity {
           galleryHeader.setText("Gallery " + rect.getId());
           SQLiteDatabase db = new FeedReaderDbHelper(getApplicationContext()).getReadableDatabase();
           try (Cursor c = db.rawQuery(
-              "SELECT s.objectId, s.title as objectTitle, image, m.title as audioTitle, m.uri as audio, m.stop, m.position " +
+              "SELECT s.objectId, s.title as objectTitle, image, m.title as audioTitle, m.uri as audio, m.stop, m.position, width, height " +
                   "FROM processed_stop s " +
                   "INNER JOIN processed_media m ON (s.id = m.stop) " +
                   "WHERE gallery = " + rect.getId() + " " +
@@ -153,7 +152,9 @@ public class MapActivity extends Activity {
               String audio = c.getString(c.getColumnIndex("audio"));
               int stop = c.getInt(c.getColumnIndex("stop"));
               int position = c.getInt(c.getColumnIndex("position"));
-              QueryModel model = new QueryModel(title, image, audioTitle, audio, stop, position, objectId);
+              int width = c.getInt(c.getColumnIndex("width"));
+              int height = c.getInt(c.getColumnIndex("height"));
+              QueryModel model = new QueryModel(title, image, audioTitle, audio, stop, position, objectId, width, height);
               if (!modelsByObjectId.containsKey(objectId)) {
                 modelsByObjectId.put(objectId, new ArrayList<QueryModel>());
               }
@@ -170,7 +171,7 @@ public class MapActivity extends Activity {
             }
             ArrayList<StopModel> stopModels = new ArrayList<>();
             for (ArrayList<QueryModel> qs : modelsByObjectId.values()) {
-              StopModel stopModel = new StopModel(qs.get(0).getArtObjectId(), rect.getId(), qs.get(0).getTitle(), qs.get(0).getImageURL());
+              StopModel stopModel = new StopModel(qs.get(0).getArtObjectId(), rect.getId(), qs.get(0).getWidth(), qs.get(0).getHeight(), qs.get(0).getTitle(), qs.get(0).getImageURL());
               for (QueryModel q : qs) {
                 stopModel.addMedia(new MediaModel(q.getMediaTitle(), q.getMediaURL(), q.getStopId()));
               }
@@ -304,26 +305,18 @@ public class MapActivity extends Activity {
       }
       final GalleryHolder holder = (GalleryHolder) convertView.getTag();
       holder.titleView.setText((position + 1) + ". " + model.getTitle());
-      holder.imageView.getLayoutParams().height = LinearLayout.LayoutParams.WRAP_CONTENT;
 
-      Glide.with(getContext()).load(model.getImageURL()).transform(new BitmapTransformation(getContext()) {
-        @Override
-        protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
-          Matrix m = new Matrix();
-          Float scale = (75.0f * density) / toTransform.getWidth();
-          //holder.imageView.getLayoutParams().height = new Float(toTransform.getHeight() * scale).intValue();
-          m.setScale(scale, scale);
-          if (toTransform.getWidth() == outWidth && toTransform.getHeight() == outHeight) {
-            return toTransform;
-          }
-          return Bitmap.createBitmap(toTransform, 0, 0, toTransform.getWidth(), toTransform.getHeight(), m, true);
-        }
 
-        @Override
-        public String getId() {
-          return "scaled123";
-        }
-      }).diskCacheStrategy(DiskCacheStrategy.RESULT).into(holder.imageView);
+      float imageScale = (75.0f * density) / model.getWidth();
+      holder.imageView.getLayoutParams().width = Math.round(imageScale * model.getWidth());
+      holder.imageView.getLayoutParams().height = Math.round(imageScale * model.getHeight());
+
+      Glide.with(getContext())
+          .load(model.getImageURL())
+          .diskCacheStrategy(DiskCacheStrategy.RESULT)
+          .fitCenter()
+          .override(Math.round(imageScale * model.getWidth()),  Math.round(imageScale * model.getHeight()))
+          .into(holder.imageView);
 
       int mediaSize = model.getMedias().size();
       for (int i = 0; i < 6; i++) {

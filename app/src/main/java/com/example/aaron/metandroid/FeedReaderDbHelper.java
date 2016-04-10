@@ -13,7 +13,7 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
   private final Context context;
 
   // If you change the database schema, you must increment the database version.
-  public static final int DATABASE_VERSION = 1;
+  public static final int DATABASE_VERSION = 3;
   public static final String DATABASE_NAME = "FeedReader.db";
 
   public FeedReaderDbHelper(Context context) {
@@ -27,7 +27,9 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
         "  objectId INTEGER NOT NULL,\n" +
         "  title CHARACTER VARYING NOT NULL,\n" +
         "  gallery INTEGER NOT NULL,\n" +
-        "  image CHARACTER VARYING NOT NULL\n" +
+        "  image CHARACTER VARYING NOT NULL,\n" +
+        "  width INTEGER VARYING NOT NULL,\n" +
+        "  height INTEGER VARYING NOT NULL\n" +
         ")");
     db.execSQL("CREATE TABLE processed_media (\n" +
         "  id INTEGER PRIMARY KEY NOT NULL,\n" +
@@ -54,6 +56,8 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
             values.put("title", matches[2]);
             values.put("gallery", matches[3]);
             values.put("image", matches[4]);
+            values.put("width", matches[5]);
+            values.put("height", matches[6]);
             db.insert("processed_stop", null, values);
           }
         }
