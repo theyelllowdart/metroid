@@ -85,7 +85,7 @@ public class MapActivity extends Activity {
 
     largeMapView = (LargeMapView) findViewById(R.id.largeMap);
     largeMapPhotoView = new MyPhotoViewAttacher(largeMapView);
-    largeMapPhotoView.setMaximumScale(10f);
+    largeMapPhotoView.setMaximumScale(20f);
     largeMapPhotoView.setMediumScale(5f);
 
 
@@ -218,20 +218,22 @@ public class MapActivity extends Activity {
 
           // Zoom to gallery on large map
           RectF imageBounds = new RectF(0, 0, largeMapPhotoView.getImageView().getWidth(), largeMapPhotoView.getImageView().getHeight());
-          Matrix m = new Matrix();
-          m.setRectToRect(rect.getScaled(), imageBounds, Matrix.ScaleToFit.CENTER);
-          float[] imageMatrixValues = new float[9];
-          m.getValues(imageMatrixValues);
-          float[] newCenters = new float[2];
-          float[] originalMatrixValues = new float[9];
-          originalMapMatrix.mapPoints(newCenters, new float[]{rect.getScaled().centerX(), rect.getScaled().centerY()});
-          originalMapMatrix.getValues(originalMatrixValues);
-          largeMapPhotoView.setScale(
-              Math.min(largeMapPhotoView.getMaximumScale(), imageMatrixValues[Matrix.MSCALE_X] / originalMatrixValues[Matrix.MSCALE_X]),
-              newCenters[0],
-              newCenters[1],
-              false
+          Matrix newMatrix = new Matrix();
+          RectF galleryRect = rect.getScaled();
+          float minSize = 50 * density;
+          float sizeX = Math.max(minSize, galleryRect.width());
+          float sizeY = Math.max(minSize, galleryRect.height());
+          RectF newViewPort = new RectF(
+              (galleryRect.centerX() - sizeX/2),
+              (galleryRect.centerY() - sizeY/2),
+              (galleryRect.centerX() + sizeX/2),
+              (galleryRect.centerY() + sizeY/2)
           );
+          newMatrix.setRectToRect(newViewPort, imageBounds, Matrix.ScaleToFit.CENTER);
+          Matrix originalInvertedMatrix = new Matrix();
+          originalMapMatrix.invert(originalInvertedMatrix);
+          newMatrix.preConcat(originalInvertedMatrix);
+          largeMapPhotoView.setDisplayMatrix(newMatrix);
         }
       }
     }
