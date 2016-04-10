@@ -113,15 +113,23 @@ public class MapActivity extends Activity {
         return;
       }
 
-      galleryAdapter.clear();
-      largeMapView.clearPins();
-      galleryHeader.setText("Select a Gallery");
-
       Matrix matrix = new Matrix();
       largeMapPhotoView.getDisplayMatrix().invert(matrix);
       float[] coordinates = new float[]{v, v1};
       matrix.mapPoints(coordinates);
       Log.i("tag", coordinates[0] / density + " " + coordinates[1] / density);
+
+      Integer pinPosition = largeMapView.getPin(coordinates[0], coordinates[1]);
+      if (pinPosition != null) {
+        galleriesView.setSelection(pinPosition);
+        return;
+      }
+
+      galleryAdapter.clear();
+      largeMapView.clearPins();
+      galleryHeader.setText("Select a Gallery");
+
+
 
 
       for (GalleryViewRect rect : MyApplication.galleryRectById.values()) {
@@ -369,14 +377,14 @@ public class MapActivity extends Activity {
               galleryDetail.setVisibility(View.VISIBLE);
               moveButtons.setVisibility(View.GONE);
 
-              List<ArtObjectLocation> pins = largeMapView.getPins();
-              for (ArtObjectLocation pin: pins) {
-                if (pin.getId() == model.getArtObjectId()) {
-                  pin.setX(coordinates[0]);
-                  pin.setY(coordinates[1]);
-                }
-              }
-              largeMapView.setPins(pins);
+//              List<ArtObjectLocation> pins = largeMapView.getPins();
+//              for (ArtObjectLocation pin: pins) {
+//                if (pin.getId() == model.getArtObjectId()) {
+//                  pin.setX(coordinates[0]);
+//                  pin.setY(coordinates[1]);
+//                }
+//              }
+//              largeMapView.setPins(pins);
               largeMapView.clearPinToPlace();
             }
           });
