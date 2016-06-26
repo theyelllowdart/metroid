@@ -36,6 +36,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import org.json.JSONException;
@@ -160,6 +161,7 @@ public class MapActivity extends Activity {
                   "ORDER BY m.stop, m.position ", null)
           ) {
             HashMap<String, ArrayList<QueryModel>> modelsByObjectId = new HashMap<>();
+            HashMap<String, ArrayList<QueryModel>> modelsByTitle = new HashMap<>();
             while ((c.moveToNext())) {
               String objectId = c.getString(c.getColumnIndexOrThrow("objectId"));
               String title = c.getString(c.getColumnIndexOrThrow("objectTitle"));
@@ -171,10 +173,18 @@ public class MapActivity extends Activity {
               int width = c.getInt(c.getColumnIndex("width"));
               int height = c.getInt(c.getColumnIndex("height"));
               QueryModel model = new QueryModel(title, image, audioTitle, audio, stop, position, objectId, width, height);
-              if (!modelsByObjectId.containsKey(objectId)) {
+              if (objectId.startsWith("s") && !modelsByTitle.containsKey(title)) {
+                modelsByTitle.put(title, new ArrayList<QueryModel>());
+              }
+              if (!objectId.startsWith("s") && !modelsByObjectId.containsKey(objectId)) {
                 modelsByObjectId.put(objectId, new ArrayList<QueryModel>());
               }
-              ArrayList<QueryModel> models = modelsByObjectId.get(objectId);
+              ArrayList<QueryModel> models;
+              if (objectId.startsWith("s")) {
+                models = modelsByTitle.get(title);
+              } else {
+                models = modelsByObjectId.get(objectId);
+              }
               boolean hasAudio = false;
               for (QueryModel q : models) {
                 if (q.getMediaURL().equals(audio)) {
@@ -186,7 +196,7 @@ public class MapActivity extends Activity {
 
             }
             ArrayList<StopModel> stopModels = new ArrayList<>();
-            for (ArrayList<QueryModel> qs : modelsByObjectId.values()) {
+            for (ArrayList<QueryModel> qs : Iterables.concat(modelsByObjectId.values(), modelsByTitle.values())) {
               StopModel stopModel = new StopModel(qs.get(0).getArtObjectId(), rect.getId(), qs.get(0).getWidth(), qs.get(0).getHeight(), qs.get(0).getTitle(), qs.get(0).getImageURL());
               for (QueryModel q : qs) {
                 stopModel.addMedia(new MediaModel(q.getMediaTitle(), q.getMediaURL(), q.getStopId()));

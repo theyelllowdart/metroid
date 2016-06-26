@@ -1,5 +1,7 @@
 package com.example.aaron.metandroid;
 
+import com.google.common.collect.ComparisonChain;
+
 import java.util.ArrayList;
 
 public class StopModel implements Comparable<StopModel> {
@@ -40,9 +42,16 @@ public class StopModel implements Comparable<StopModel> {
     medias.add(mediaModel);
   }
 
+  public boolean isOverview() {
+    return artObjectId.startsWith("s");
+  }
+
   @Override
   public int compareTo(StopModel another) {
-    return this.title.compareTo(another.getTitle());
+    return ComparisonChain.start()
+        .compareTrueFirst(this.isOverview(), another.isOverview())
+        .compare(this.title, another.title)
+        .result();
   }
 
   public ArrayList<MediaModel> getMedias() {

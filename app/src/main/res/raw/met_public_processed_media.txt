@@ -544,7 +544,6 @@
 544,949,0,Kids: Asian Art,http://resources.metmuseum.org/resources/audioguide/media/eng_949.mp3
 545,950,0,Kids: Asian Art,http://resources.metmuseum.org/resources/audioguide/media/eng_950.mp3
 546,950,1,The Director's Tour,http://resources.metmuseum.org/resources/audioguide/media/eng_121_dir2011.mp3
-659,1037,0,Commentary,http://resources.metmuseum.org/resources/audioguide/media/eng_1037.mp3
 547,950,2,The Director's Tour Part 2,http://resources.metmuseum.org/resources/audioguide/media/eng_5871_dir2011.mp3
 548,951,0,Kids: Asian Art,http://resources.metmuseum.org/resources/audioguide/media/eng_951.mp3
 549,952,0,Commentary,http://resources.metmuseum.org/resources/audioguide/media/eng_952.mp3
@@ -597,7 +596,6 @@
 596,992,0,"Kids: Arts of Africa, Oceania, and the Americas",http://resources.metmuseum.org/resources/audioguide/media/eng_992.mp3
 597,993,0,"Kids: Arts of Africa, Oceania, and the Americas",http://resources.metmuseum.org/resources/audioguide/media/eng_993.mp3
 598,993,1,"Kids: Arts of Africa, Oceania, and the Americas Part 2",http://resources.metmuseum.org/resources/audioguide/media/eng_994.mp3
-660,1038,0,Commentary,http://resources.metmuseum.org/resources/audioguide/media/eng_1038.mp3
 599,994,0,"Kids: Arts of Africa, Oceania, and the Americas Part 2",http://resources.metmuseum.org/resources/audioguide/media/eng_994.mp3
 600,994,1,"Kids: Arts of Africa, Oceania, and the Americas",http://resources.metmuseum.org/resources/audioguide/media/eng_993.mp3
 601,995,0,"Kids: Arts of Africa, Oceania, and the Americas",http://resources.metmuseum.org/resources/audioguide/media/eng_995fix.mp3
@@ -658,6 +656,8 @@
 656,1034,0,Commentary,http://resources.metmuseum.org/resources/audioguide/media/na15896_eng_1034.mp3
 657,1035,0,Commentary,http://resources.metmuseum.org/resources/audioguide/media/eng_1035.mp3
 658,1036,0,Commentary,http://resources.metmuseum.org/resources/audioguide/media/eng_1036.mp3
+659,1037,0,Commentary,http://resources.metmuseum.org/resources/audioguide/media/eng_1037.mp3
+660,1038,0,Commentary,http://resources.metmuseum.org/resources/audioguide/media/eng_1038.mp3
 661,1039,0,Commentary,http://resources.metmuseum.org/resources/audioguide/media/na15896_eng_1039.mp3
 662,1039,1,Commentary Part 2,http://resources.metmuseum.org/resources/audioguide/media/eng_1453.mp3
 663,1039,2,Kids: Greek and Roman Art,http://resources.metmuseum.org/resources/audioguide/media/eng_832.mp3
