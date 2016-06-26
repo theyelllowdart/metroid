@@ -10,6 +10,7 @@ import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,15 +24,26 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.google.common.base.Joiner;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -53,6 +65,8 @@ public class MapActivity extends Activity {
   private LinearLayout mediaLayout;
   private TextView acceptButton;
 
+  RequestQueue queue;
+
   private class MyPhotoViewAttacher extends PhotoViewAttacher{
 
     public MyPhotoViewAttacher(ImageView imageView) {
@@ -72,6 +86,7 @@ public class MapActivity extends Activity {
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
+    queue = Volley.newRequestQueue(this);
     setContentView(R.layout.activity_map);
 
     density = getResources().getDisplayMetrics().density;
@@ -363,15 +378,47 @@ public class MapActivity extends Activity {
               float[] coordinates = new float[]{pinLocation.x, pinLocation.y};
               matrix.mapPoints(coordinates);
 
+              float x = coordinates[0] / density;
+              float y = coordinates[1] / density;
               SQLiteDatabase db = new FeedReaderDbHelper(getApplicationContext()).getWritableDatabase();
               ContentValues contentValues = new ContentValues();
               contentValues.put("id", model.getArtObjectId());
-              contentValues.put("x", coordinates[0] / density);
-              contentValues.put("y", coordinates[1] / density);
+              contentValues.put("x", x);
+              contentValues.put("y", y);
               db.insertWithOnConflict("object_location", "id", contentValues, SQLiteDatabase.CONFLICT_REPLACE);
               galleryDetail.setVisibility(View.VISIBLE);
               moveButtons.setVisibility(View.GONE);
 
+              String androidId = Settings.Secure.getString(getContext().getContentResolver(),
+                  Settings.Secure.ANDROID_ID);
+              try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("objectId", model.getArtObjectId());
+                jsonObject.put("x", x);
+                jsonObject.put("y", y);
+                jsonObject.put("user", androidId);
+                jsonObject.put("created", System.currentTimeMillis());
+                JsonObjectRequest request = new JsonObjectRequest(
+                    Request.Method.POST,
+                    "https://glacial-everglades-23026.herokuapp.com/location",
+                    jsonObject,
+                    new Response.Listener<JSONObject>() {
+                      @Override
+                      public void onResponse(JSONObject response) {
+
+                      }
+                    },
+                    new Response.ErrorListener() {
+                      @Override
+                      public void onErrorResponse(VolleyError error) {
+
+                      }
+                    }
+                );
+                queue.add(request);
+              } catch (JSONException e) {
+                Log.e("upload-location", e.getMessage(), e);
+              }
 //              List<ArtObjectLocation> pins = largeMapView.getPins();
 //              for (ArtObjectLocation pin: pins) {
 //                if (pin.getId() == model.getArtObjectId()) {
