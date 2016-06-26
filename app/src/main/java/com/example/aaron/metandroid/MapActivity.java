@@ -353,7 +353,7 @@ public class MapActivity extends Activity {
         public boolean onLongClick(View v) {
           galleryDetail.setVisibility(View.GONE);
           moveButtons.setVisibility(View.VISIBLE);
-          largeMapView.setPinToPlace(position + 1);
+          largeMapView.setPinToPlace(position);
           acceptButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
