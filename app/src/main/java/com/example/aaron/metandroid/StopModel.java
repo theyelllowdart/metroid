@@ -3,7 +3,7 @@ package com.example.aaron.metandroid;
 import java.util.ArrayList;
 
 public class StopModel implements Comparable<StopModel> {
-  private final int artObjectId;
+  private final String artObjectId;
   private final int galleryId;
   private final int width;
   private final int height;
@@ -11,7 +11,7 @@ public class StopModel implements Comparable<StopModel> {
   private final String imageURL;
   private final ArrayList<MediaModel> medias = new ArrayList<>();
 
-  public StopModel(int artObjectId, int galleryId, int width, int height, String title, String imageURL) {
+  public StopModel(String artObjectId, int galleryId, int width, int height, String title, String imageURL) {
     this.artObjectId = artObjectId;
     this.galleryId = galleryId;
     this.width = width;
@@ -20,7 +20,7 @@ public class StopModel implements Comparable<StopModel> {
     this.imageURL = imageURL;
   }
 
-  public int getArtObjectId() {
+  public String getArtObjectId() {
     return artObjectId;
   }
 

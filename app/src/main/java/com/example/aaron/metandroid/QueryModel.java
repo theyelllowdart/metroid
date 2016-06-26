@@ -7,11 +7,11 @@ public class QueryModel {
     private final String mediaURL;
     private final int stopId;
     private final int position;
-    private final int artObjectId;
+    private final String artObjectId;
     private final int width;
     private final int height;
 
-    public QueryModel(String title, String imageURL, String mediaTitle, String mediaURL, int stopId, int position, int artObjectId, int width, int height) {
+    public QueryModel(String title, String imageURL, String mediaTitle, String mediaURL, int stopId, int position, String artObjectId, int width, int height) {
         this.title = title;
         this.imageURL = imageURL;
         this.mediaTitle = mediaTitle;
@@ -47,7 +47,7 @@ public class QueryModel {
         return position;
     }
 
-    public int getArtObjectId() {
+    public String getArtObjectId() {
         return artObjectId;
     }
 

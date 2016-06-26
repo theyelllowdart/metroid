@@ -158,9 +158,9 @@ public class MapActivity extends Activity {
                   "AND m.uri IS NOT NULL " +
                   "ORDER BY m.stop, m.position ", null)
           ) {
-            HashMap<Integer, ArrayList<QueryModel>> modelsByObjectId = new HashMap<>();
+            HashMap<String, ArrayList<QueryModel>> modelsByObjectId = new HashMap<>();
             while ((c.moveToNext())) {
-              int objectId = c.getInt(c.getColumnIndexOrThrow("objectId"));
+              String objectId = c.getString(c.getColumnIndexOrThrow("objectId"));
               String title = c.getString(c.getColumnIndexOrThrow("objectTitle"));
               String image = c.getString(c.getColumnIndexOrThrow("image"));
               String audioTitle = c.getString(c.getColumnIndex("audioTitle"));
@@ -198,19 +198,19 @@ public class MapActivity extends Activity {
 
 
             // Find pin Locations
-            HashSet<Integer> artObjectIds = new HashSet<>();
+            HashSet<String> artObjectIds = new HashSet<>();
             for (StopModel s : stopModels) {
-              artObjectIds.add(s.getArtObjectId());
+              artObjectIds.add("'" + s.getArtObjectId() + "'");
             }
             if (!artObjectIds.isEmpty()) {
               try (Cursor cl = db.rawQuery(
-                  "SELECT id, x, y " +
+                  "SELECT objectId, x, y " +
                       "FROM object_location " +
-                      "WHERE id in (" + Joiner.on(',').join(artObjectIds) + ") ", null)
+                      "WHERE objectId in (" + Joiner.on(',').join(artObjectIds) + ") ", null)
               ) {
-                HashMap<Integer, PointF> artObjectIdToPoint = new HashMap<>();
+                HashMap<String, PointF> artObjectIdToPoint = new HashMap<>();
                 while ((cl.moveToNext())) {
-                  int objectId = cl.getInt(cl.getColumnIndexOrThrow("id"));
+                  String objectId = cl.getString(cl.getColumnIndexOrThrow("objectId"));
                   float x = cl.getFloat(cl.getColumnIndexOrThrow("x"));
                   float y = cl.getFloat(cl.getColumnIndexOrThrow("y"));
                   artObjectIdToPoint.put(objectId, new PointF(x * density, y * density));
@@ -382,10 +382,10 @@ public class MapActivity extends Activity {
               float y = coordinates[1] / density;
               SQLiteDatabase db = new FeedReaderDbHelper(getApplicationContext()).getWritableDatabase();
               ContentValues contentValues = new ContentValues();
-              contentValues.put("id", model.getArtObjectId());
+              contentValues.put("objectId", model.getArtObjectId());
               contentValues.put("x", x);
               contentValues.put("y", y);
-              db.insertWithOnConflict("object_location", "id", contentValues, SQLiteDatabase.CONFLICT_REPLACE);
+              db.insertWithOnConflict("object_location", "objectId", contentValues, SQLiteDatabase.CONFLICT_REPLACE);
               galleryDetail.setVisibility(View.VISIBLE);
               moveButtons.setVisibility(View.GONE);
 

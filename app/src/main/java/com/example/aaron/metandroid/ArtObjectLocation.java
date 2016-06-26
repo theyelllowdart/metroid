@@ -1,12 +1,12 @@
 package com.example.aaron.metandroid;
 
 public class ArtObjectLocation {
-  private final int id;
+  private final String id;
   private final int position;
   private float x;
   private float y;
 
-  public ArtObjectLocation(int id, int position, float x, float y) {
+  public ArtObjectLocation(String id, int position, float x, float y) {
     this.id = id;
     this.position = position;
     this.x = x;
@@ -17,7 +17,7 @@ public class ArtObjectLocation {
     return position;
   }
 
-  public int getId() {
+  public String getId() {
     return id;
   }
 

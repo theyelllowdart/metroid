@@ -16,7 +16,7 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
   private final Context context;
 
   // If you change the database schema, you must increment the database version.
-  public static final int DATABASE_VERSION = 16;
+  public static final int DATABASE_VERSION = 20;
   public static final String DATABASE_NAME = "FeedReader.db";
 
   public FeedReaderDbHelper(Context context) {
@@ -27,7 +27,7 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
   public void onCreate(SQLiteDatabase db) {
     db.execSQL("CREATE TABLE processed_stop (\n" +
         "  id INTEGER PRIMARY KEY NOT NULL,\n" +
-        "  objectId INTEGER NOT NULL,\n" +
+        "  objectId CHARACTER VARYING NOT NULL,\n" +
         "  title CHARACTER VARYING NOT NULL,\n" +
         "  gallery INTEGER NOT NULL,\n" +
         "  image CHARACTER VARYING NOT NULL,\n" +
@@ -42,7 +42,7 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
         "  uri CHARACTER VARYING NOT NULL\n" +
         ")");
     db.execSQL("CREATE TABLE object_location (\n" +
-        "  id INTEGER PRIMARY KEY NOT NULL,\n" +
+        "  objectId CHARACTER VARYING PRIMARY KEY NOT NULL,\n" +
         "  x FLOAT NOT NULL,\n" +
         "  y FLOAT NOT NULL\n" +
         ")");
@@ -62,12 +62,10 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
             db.insert("processed_stop", null, values);
         }
       }
-      try (BufferedReader bufferedReader = new BufferedReader(
+      try (CSVReader reader = new CSVReader(
           new InputStreamReader(context.getResources().openRawResource(R.raw.met_public_processed_media)))) {
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
-          if (!line.trim().isEmpty()) {
-            String[] matches = line.split(",");
+        String[] matches;
+        while ((matches = reader.readNext()) != null) {
             ContentValues values = new ContentValues();
             values.put("id", matches[0]);
             values.put("stop", matches[1]);
@@ -77,7 +75,6 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
               values.put("uri", matches[4]);
             }
             db.insert("processed_media", null, values);
-          }
         }
       }
     } catch (IOException e) {
