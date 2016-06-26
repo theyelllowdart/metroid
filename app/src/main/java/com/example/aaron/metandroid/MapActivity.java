@@ -220,7 +220,7 @@ public class MapActivity extends Activity {
           RectF imageBounds = new RectF(0, 0, largeMapPhotoView.getImageView().getWidth(), largeMapPhotoView.getImageView().getHeight());
           Matrix newMatrix = new Matrix();
           RectF galleryRect = rect.getScaled();
-          float minSize = 50 * density;
+          float minSize = 100 * density;
           float sizeX = Math.max(minSize, galleryRect.width());
           float sizeY = Math.max(minSize, galleryRect.height());
           RectF newViewPort = new RectF(
