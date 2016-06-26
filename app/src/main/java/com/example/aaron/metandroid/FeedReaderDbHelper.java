@@ -5,15 +5,18 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+
+import au.com.bytecode.opencsv.CSVReader;
 
 public class FeedReaderDbHelper extends SQLiteOpenHelper {
   private final Context context;
 
   // If you change the database schema, you must increment the database version.
-  public static final int DATABASE_VERSION = 3;
+  public static final int DATABASE_VERSION = 16;
   public static final String DATABASE_NAME = "FeedReader.db";
 
   public FeedReaderDbHelper(Context context) {
@@ -44,12 +47,10 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
         "  y FLOAT NOT NULL\n" +
         ")");
     try {
-      try (BufferedReader bufferedReader = new BufferedReader(
-          new InputStreamReader(context.getResources().openRawResource(R.raw.met_public_processed_stop)))) {
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
-          if (!line.trim().isEmpty()) {
-            String[] matches = line.split(",");
+      try (CSVReader reader = new CSVReader(
+          new InputStreamReader(context.getResources().openRawResource(R.raw.met_public_processed_stop)), ',', '"', 1)) {
+        String[] matches;
+        while ((matches = reader.readNext()) != null) {
             ContentValues values = new ContentValues();
             values.put("id", matches[0]);
             values.put("objectId", matches[1]);
@@ -59,7 +60,6 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
             values.put("width", matches[5]);
             values.put("height", matches[6]);
             db.insert("processed_stop", null, values);
-          }
         }
       }
       try (BufferedReader bufferedReader = new BufferedReader(
