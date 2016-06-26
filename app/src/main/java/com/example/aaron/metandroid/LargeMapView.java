@@ -95,7 +95,7 @@ public class LargeMapView extends ImageView {
 
   public void setPins(List<ArtObjectLocation> locations) {
     this.pins.clear();
-    for (ArtObjectLocation location: locations){
+    for (ArtObjectLocation location: locations) {
       float halfPinSize = 5 * density;
       RectF rect = new RectF(
           location.getX() - halfPinSize,
@@ -234,7 +234,7 @@ public class LargeMapView extends ImageView {
       pinTextPaint.setColor(Color.RED);
       pinTextPaint.setAlpha(alpha);
       pinTextPaint.setTextSize(4 * density * imageMatrixValues[Matrix.MSCALE_X]);
-      canvas.drawText(String.valueOf(pin.getPosition() + 1), finalPinBounds.centerX(), finalPinBounds.centerY() - halfPinSize / 8, pinTextPaint);
+      canvas.drawText(String.valueOf(pin.getPosition()), finalPinBounds.centerX(), finalPinBounds.centerY() - halfPinSize / 8, pinTextPaint);
     }
   }
 
