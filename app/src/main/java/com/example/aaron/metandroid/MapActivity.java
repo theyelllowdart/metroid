@@ -360,12 +360,16 @@ public class MapActivity extends Activity {
           }
           audioTitle.setVisibility(View.VISIBLE);
           final MediaModel media = model.getMedias().get(i);
+          final ArrayList<MediaModel> queue = new ArrayList<>();
+          for (int j = i + 1; j < model.getMedias().size(); j++) {
+            queue.add(model.getMedias().get(j));
+          }
           audioTitle.setText(media.getTitle());
           audioTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
               try {
-                myPlayer.play(media.getUri(), media.getTitle());
+                myPlayer.play(media.getUri(), media.getTitle(), queue);
               } catch (IOException e) {
                 throw new RuntimeException(e);
               }

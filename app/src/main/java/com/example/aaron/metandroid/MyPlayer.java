@@ -11,6 +11,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MyPlayer {
   final private static int PROGRESS_UPDATE_MS = 100;
@@ -24,6 +26,9 @@ public class MyPlayer {
   private MediaPlayer mediaPlayer;
   private Boolean isPrepared = false;
   private Boolean isSeekBarDragging = false;
+  private Boolean isFinished = false;
+
+  private ArrayList<MediaModel> queue = new ArrayList<>();
 
   public MyPlayer(SeekBar seekBar, Button playButton, final TextView timeView, TextView titleView) {
     this.seekBar = seekBar;
@@ -35,7 +40,19 @@ public class MyPlayer {
     this.playButton.setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View v) {
-        if (isPrepared) {
+        if (isFinished) {
+          if (queue.size() > 0) {
+            ArrayList<MediaModel> newQueue = new ArrayList<MediaModel>(queue);
+            MediaModel media = newQueue.remove(0);
+            try {
+              play(media.getUri(), media.getTitle(), newQueue);
+            } catch (IOException e) {
+              throw new RuntimeException(e);
+            }
+          } else {
+            start();
+          }
+        } else if (isPrepared) {
           if (mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             progressHandler.removeCallbacks(updateProgress);
@@ -80,8 +97,11 @@ public class MyPlayer {
 
   }
 
-  public void play(String uri, String title) throws IOException {
+  public void play(String uri, String title, List<MediaModel> queue) throws IOException {
     release();
+
+    this.queue.clear();
+    this.queue.addAll(queue);
 
     this.titleView.setText(title);
 
@@ -113,6 +133,7 @@ public class MyPlayer {
           if (mediaPlayer != null) {
             progressHandler.removeCallbacks(updateProgress);
           }
+          isFinished = true;
         }
       }
     });
@@ -128,14 +149,15 @@ public class MyPlayer {
   public void release() {
     synchronized (playStateLock) {
       if (mediaPlayer != null) {
-        isPrepared = false;
-        seekBar.setProgress(0);
-        seekBar.setSecondaryProgress(0);
         mediaPlayer.reset();
         mediaPlayer.release();
         mediaPlayer = null;
-        progressHandler.removeCallbacks(updateProgress);
       }
+      isPrepared = false;
+      isFinished = false;
+      seekBar.setProgress(0);
+      seekBar.setSecondaryProgress(0);
+      progressHandler.removeCallbacks(updateProgress);
     }
   }
 
