@@ -10,6 +10,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.VectorDrawable;
+import android.location.Location;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.widget.ImageView;
@@ -35,6 +36,7 @@ public class LargeMapView extends ImageView {
   private Integer pinToPlace = null;
   private PointF pinLocation = new PointF();
   private ArrayList<Rect> pinBoundsList = new ArrayList<>();
+  private ArrayList<ArtObjectLocation> locations = new ArrayList<>();
 
 
   public LargeMapView(Context context, AttributeSet attrs) throws IOException {
@@ -87,14 +89,23 @@ public class LargeMapView extends ImageView {
     }
   }
 
-  public void setPins(List<ArtObjectLocation> pins) {
+  public ArrayList<ArtObjectLocation> getLocations() {
+    return locations;
+  }
+
+  public void setPins(List<ArtObjectLocation> locations) {
     this.pins.clear();
-    for (int i = 0; i < pins.size(); i++){
-      ArtObjectLocation pin = pins.get(i);
+    for (ArtObjectLocation location: locations){
       float halfPinSize = 5 * density;
-      RectF rect = new RectF(pin.getX() - halfPinSize, pin.getY() - (2 * halfPinSize), pin.getX() + halfPinSize, pin.getY());
-      this.pins.add(new DrawPin(i, rect));
+      RectF rect = new RectF(
+          location.getX() - halfPinSize,
+          location.getY() - (2 * halfPinSize),
+          location.getX() + halfPinSize, location.getY()
+      );
+      this.pins.add(new DrawPin(location.getPosition(), rect));
     }
+    this.locations.clear();
+    this.locations.addAll(locations);
     this.invalidate();
   }
 

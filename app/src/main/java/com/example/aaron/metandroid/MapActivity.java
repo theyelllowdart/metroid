@@ -36,6 +36,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -419,14 +420,21 @@ public class MapActivity extends Activity {
               } catch (JSONException e) {
                 Log.e("upload-location", e.getMessage(), e);
               }
-//              List<ArtObjectLocation> pins = largeMapView.getPins();
-//              for (ArtObjectLocation pin: pins) {
-//                if (pin.getId() == model.getArtObjectId()) {
-//                  pin.setX(coordinates[0]);
-//                  pin.setY(coordinates[1]);
-//                }
-//              }
-//              largeMapView.setPins(pins);
+              ArrayList<ArtObjectLocation> newLocations = new ArrayList<ArtObjectLocation>();
+              for (ArtObjectLocation location: largeMapView.getLocations()) {
+                if (location.getId().equals(model.getArtObjectId())) {
+                  ArtObjectLocation newLocation = new ArtObjectLocation(
+                      location.getId(),
+                      location.getPosition(),
+                      coordinates[0],
+                      coordinates[1]
+                  );
+                  newLocations.add(newLocation);
+                } else {
+                  newLocations.add(location);
+                }
+              }
+              largeMapView.setPins(newLocations);
               largeMapView.clearPinToPlace();
             }
           });
