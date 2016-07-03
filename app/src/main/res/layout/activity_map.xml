@@ -59,6 +59,31 @@
 
   </LinearLayout>
 
+
+  <LinearLayout
+    android:id="@+id/missingStopButtons"
+    android:layout_width="match_parent"
+    android:layout_height="0dip"
+    android:layout_weight=".4"
+    android:visibility="gone"
+    android:orientation="vertical">
+
+    <EditText
+      android:id="@+id/missingStopNumber"
+      android:layout_width="fill_parent"
+      android:layout_height="wrap_content"
+      android:inputType="number" />
+
+    <TextView
+      android:id="@+id/missingStopAccept"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:background="@android:color/white"
+      android:text="Accept"
+      android:textStyle="bold"/>
+
+  </LinearLayout>
+
   <LinearLayout
     android:id="@+id/mediaLayout"
     android:layout_width="match_parent"

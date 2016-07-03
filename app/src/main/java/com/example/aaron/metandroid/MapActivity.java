@@ -1,8 +1,10 @@
 package com.example.aaron.metandroid;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
@@ -16,8 +18,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -64,12 +68,15 @@ public class MapActivity extends Activity {
   private Matrix originalMapMatrix;
   private LinearLayout galleryDetail;
   private LinearLayout moveButtons;
+  private LinearLayout missingStopButtons;
+  private TextView missingStopAcceptButton;
   private LinearLayout mediaLayout;
   private TextView acceptButton;
+  private LinearLayout addStopView;
+  private EditText missingStopNumberButton;
+  private RequestQueue queue;
 
-  RequestQueue queue;
-
-  private class MyPhotoViewAttacher extends PhotoViewAttacher{
+  private class MyPhotoViewAttacher extends PhotoViewAttacher {
 
     public MyPhotoViewAttacher(ImageView imageView) {
       super(imageView);
@@ -107,6 +114,10 @@ public class MapActivity extends Activity {
 
 
     galleriesView = (ListView) findViewById(R.id.listView);
+    addStopView = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.add_stop, null);
+    addStopView.setVisibility(View.GONE);
+    galleriesView.setFooterDividersEnabled(false);
+    galleriesView.addFooterView(addStopView);
     galleryAdapter = new GalleryAdapter(this, android.R.layout.simple_list_item_1);
     galleriesView.setAdapter(galleryAdapter);
 
@@ -116,19 +127,21 @@ public class MapActivity extends Activity {
 
     galleryDetail = (LinearLayout) findViewById(R.id.galleryDetail);
     moveButtons = (LinearLayout) findViewById(R.id.moveButtons);
+    missingStopButtons = (LinearLayout) findViewById(R.id.missingStopButtons);
     mediaLayout = (LinearLayout) findViewById(R.id.mediaLayout);
     acceptButton = (TextView) findViewById(R.id.accept);
+    missingStopAcceptButton = (TextView) findViewById(R.id.missingStopAccept);
+    missingStopNumberButton = (EditText) findViewById(R.id.missingStopNumber);
   }
-
 
 
   private class OnMapTap implements PhotoViewAttacher.OnViewTapListener {
     @Override
     public void onViewTap(View view, float v, float v1) {
-      if (largeMapView.getPinToPlace() != null){
+      addStopView.setVisibility(View.VISIBLE);
+      if (largeMapView.getPinToPlace() != null) {
         return;
       }
-
       Matrix matrix = new Matrix();
       largeMapPhotoView.getDisplayMatrix().invert(matrix);
       float[] coordinates = new float[]{v, v1};
@@ -146,10 +159,9 @@ public class MapActivity extends Activity {
       galleryHeader.setText("Select a Gallery");
 
 
-
-
       for (GalleryViewRect rect : MyApplication.galleryRectById.values()) {
         if (rect.contains(coordinates[0], coordinates[1])) {
+          final int gallery = rect.getId();
           galleryHeader.setText("Gallery " + rect.getId());
           SQLiteDatabase db = new FeedReaderDbHelper(getApplicationContext()).getReadableDatabase();
           try (Cursor c = db.rawQuery(
@@ -250,16 +262,90 @@ public class MapActivity extends Activity {
           float sizeX = Math.max(minSize, galleryRect.width());
           float sizeY = Math.max(minSize, galleryRect.height());
           RectF newViewPort = new RectF(
-              (galleryRect.centerX() - sizeX/2),
-              (galleryRect.centerY() - sizeY/2),
-              (galleryRect.centerX() + sizeX/2),
-              (galleryRect.centerY() + sizeY/2)
+              (galleryRect.centerX() - sizeX / 2),
+              (galleryRect.centerY() - sizeY / 2),
+              (galleryRect.centerX() + sizeX / 2),
+              (galleryRect.centerY() + sizeY / 2)
           );
           newMatrix.setRectToRect(newViewPort, imageBounds, Matrix.ScaleToFit.CENTER);
           Matrix originalInvertedMatrix = new Matrix();
           originalMapMatrix.invert(originalInvertedMatrix);
           newMatrix.preConcat(originalInvertedMatrix);
           largeMapPhotoView.setDisplayMatrix(newMatrix);
+
+
+          addStopView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              PointF pinLocation = largeMapView.getPinLocation();
+              Matrix matrix = new Matrix();
+              largeMapPhotoView.getDisplayMatrix().invert(matrix);
+              float[] coordinates = new float[]{pinLocation.x, pinLocation.y};
+              matrix.mapPoints(coordinates);
+              float x = coordinates[0];
+              float y = coordinates[1];
+              final ArrayList<ArtObjectLocation> originalLocations = largeMapView.getLocations();
+              ArrayList<ArtObjectLocation> newLocations = new ArrayList<>(originalLocations);
+              newLocations.add(new ArtObjectLocation("temp", 0, x, y));
+              largeMapView.setPins(newLocations);
+
+              largeMapView.setPinToPlace(0);
+              galleryDetail.setVisibility(View.GONE);
+              missingStopButtons.setVisibility(View.VISIBLE);
+              missingStopAcceptButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                  String androidId = Settings.Secure.getString(getApplicationContext().getContentResolver(),
+                      Settings.Secure.ANDROID_ID);
+                  try {
+                    PointF pinLocation = largeMapView.getPinLocation();
+                    Matrix matrix = new Matrix();
+                    largeMapPhotoView.getDisplayMatrix().invert(matrix);
+                    float[] coordinates = new float[]{pinLocation.x, pinLocation.y};
+                    matrix.mapPoints(coordinates);
+
+                    float x = coordinates[0] / density;
+                    float y = coordinates[1] / density;
+
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("stop", missingStopNumberButton.getText());
+                    jsonObject.put("gallery", gallery);
+                    jsonObject.put("x", x);
+                    jsonObject.put("y", y);
+                    jsonObject.put("user", androidId);
+                    jsonObject.put("created", System.currentTimeMillis());
+                    JsonObjectRequest request = new JsonObjectRequest(
+                        Request.Method.POST,
+                        "https://glacial-everglades-23026.herokuapp.com/missing-stop",
+                        jsonObject,
+                        new Response.Listener<JSONObject>() {
+                          @Override
+                          public void onResponse(JSONObject response) {
+
+                          }
+                        },
+                        new Response.ErrorListener() {
+                          @Override
+                          public void onErrorResponse(VolleyError error) {
+
+                          }
+                        }
+                    );
+                    queue.add(request);
+                  } catch (JSONException e) {
+                    Log.e("upload-missing-stop", e.getMessage(), e);
+                  }
+                  InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                  imm.hideSoftInputFromWindow(missingStopNumberButton.getWindowToken(), 0);
+
+                  galleryDetail.setVisibility(View.VISIBLE);
+                  missingStopButtons.setVisibility(View.GONE);
+                  largeMapView.setPins(originalLocations);
+                  largeMapView.clearPinToPlace();
+                }
+              });
+            }
+          });
         }
       }
     }
@@ -343,7 +429,7 @@ public class MapActivity extends Activity {
           .load(model.getImageURL())
           .diskCacheStrategy(DiskCacheStrategy.RESULT)
           .fitCenter()
-          .override(Math.round(imageScale * model.getWidth()),  Math.round(imageScale * model.getHeight()))
+          .override(Math.round(imageScale * model.getWidth()), Math.round(imageScale * model.getHeight()))
           .into(holder.imageView);
 
       int mediaSize = model.getMedias().size();
@@ -435,7 +521,7 @@ public class MapActivity extends Activity {
                 Log.e("upload-location", e.getMessage(), e);
               }
               ArrayList<ArtObjectLocation> newLocations = new ArrayList<ArtObjectLocation>();
-              for (ArtObjectLocation location: largeMapView.getLocations()) {
+              for (ArtObjectLocation location : largeMapView.getLocations()) {
                 if (location.getId().equals(model.getArtObjectId())) {
                   ArtObjectLocation newLocation = new ArtObjectLocation(
                       location.getId(),
