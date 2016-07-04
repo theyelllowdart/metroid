@@ -165,11 +165,10 @@ public class MapActivity extends Activity {
           galleryHeader.setText("Gallery " + rect.getId());
           SQLiteDatabase db = new FeedReaderDbHelper(getApplicationContext()).getReadableDatabase();
           try (Cursor c = db.rawQuery(
-              "SELECT s.objectId, s.title as objectTitle, image, m.title as audioTitle, m.uri as audio, m.stop, m.position, width, height " +
+              "SELECT s.objectId, s.title as objectTitle, image, m.title as audioTitle, m.uri as audio, s.id as stop, m.position, width, height " +
                   "FROM processed_stop s " +
-                  "INNER JOIN processed_media m ON (s.id = m.stop) " +
+                  "LEFT OUTER JOIN processed_media m ON (s.id = m.stop) " +
                   "WHERE gallery = " + rect.getId() + " " +
-                  "AND m.uri IS NOT NULL " +
                   "ORDER BY m.stop, m.position ", null)
           ) {
             HashMap<String, ArrayList<QueryModel>> modelsByObjectId = new HashMap<>();
@@ -179,7 +178,13 @@ public class MapActivity extends Activity {
               String title = c.getString(c.getColumnIndexOrThrow("objectTitle"));
               String image = c.getString(c.getColumnIndexOrThrow("image"));
               String audioTitle = c.getString(c.getColumnIndex("audioTitle"));
-              String audio = c.getString(c.getColumnIndex("audio"));
+              String audio = null;
+              if (audioTitle == null) {
+                audioTitle = "Broken link";
+                audio = "broken";
+              } else {
+                audio = c.getString(c.getColumnIndex("audio"));
+              }
               int stop = c.getInt(c.getColumnIndex("stop"));
               int position = c.getInt(c.getColumnIndex("position"));
               int width = c.getInt(c.getColumnIndex("width"));
@@ -451,16 +456,18 @@ public class MapActivity extends Activity {
             queue.add(model.getMedias().get(j));
           }
           audioTitle.setText(media.getTitle());
-          audioTitle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              try {
-                myPlayer.play(media.getUri(), media.getTitle(), queue);
-              } catch (IOException e) {
-                throw new RuntimeException(e);
+          if (!media.getTitle().equals("Broken link")) {
+            audioTitle.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View v) {
+                try {
+                  myPlayer.play(media.getUri(), media.getTitle(), queue);
+                } catch (IOException e) {
+                  throw new RuntimeException(e);
+                }
               }
-            }
-          });
+            });
+          }
         }
       }
 
