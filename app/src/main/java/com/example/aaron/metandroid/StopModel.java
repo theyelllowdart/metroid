@@ -42,16 +42,26 @@ public class StopModel implements Comparable<StopModel> {
     medias.add(mediaModel);
   }
 
-  public boolean isOverview() {
+  public boolean isSynthetic() {
     return artObjectId.startsWith("s");
   }
 
+
   @Override
   public int compareTo(StopModel another) {
-    return ComparisonChain.start()
-        .compareTrueFirst(this.isOverview(), another.isOverview())
-        .compare(this.title, another.title)
-        .result();
+    if (this.isSynthetic() && another.isSynthetic()) {
+      return ComparisonChain.start()
+          .compareTrueFirst(this.getTitle().startsWith("Overview"), another.getTitle().startsWith("Overview"))
+          .compareTrueFirst(this.getTitle().contains("Gallery"), another.getTitle().contains("Gallery"))
+          .compare(this.getTitle(), another.getTitle())
+          .result();
+
+    } else {
+      return ComparisonChain.start()
+          .compareTrueFirst(this.isSynthetic(), another.isSynthetic())
+          .compare(this.getTitle(), another.getTitle())
+          .result();
+    }
   }
 
   public ArrayList<MediaModel> getMedias() {
