@@ -177,6 +177,8 @@ public class MapActivity extends Activity {
               String objectId = c.getString(c.getColumnIndexOrThrow("objectId"));
               String title = c.getString(c.getColumnIndexOrThrow("objectTitle"));
               String image = c.getString(c.getColumnIndexOrThrow("image"));
+              int stop = c.getInt(c.getColumnIndex("stop"));
+
               String audioTitle = c.getString(c.getColumnIndex("audioTitle"));
               String audio = null;
               if (audioTitle == null) {
@@ -185,7 +187,8 @@ public class MapActivity extends Activity {
               } else {
                 audio = c.getString(c.getColumnIndex("audio"));
               }
-              int stop = c.getInt(c.getColumnIndex("stop"));
+              audioTitle = audioTitle + '-' + stop;
+
               int position = c.getInt(c.getColumnIndex("position"));
               int width = c.getInt(c.getColumnIndex("width"));
               int height = c.getInt(c.getColumnIndex("height"));
