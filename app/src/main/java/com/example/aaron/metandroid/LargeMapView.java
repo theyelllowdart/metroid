@@ -45,7 +45,7 @@ public class LargeMapView extends ImageView {
     density = getResources().getDisplayMetrics().density;
 
     textPaint = new Paint();
-    textPaint.setColor(Color.WHITE);
+    textPaint.setColor(Color.BLACK);
     textPaint.setStyle(Paint.Style.FILL);
     textPaint.setTextAlign(Paint.Align.CENTER);
     // textPaint.setAntiAlias(true);

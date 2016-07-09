@@ -44,8 +44,8 @@ public class MyApplication extends Application {
             String[] matches = line.split(",");
 
             float[] coord = new float[]{
-                Float.parseFloat(matches[1]) * density,
-                Float.parseFloat(matches[2]) * density};
+                (Float.parseFloat(matches[1]) * 0.908155f - 30.8f) * density,
+                (Float.parseFloat(matches[2]) * 0.90515f + 38.943f) * density};
             GalleryLabel label = new GalleryLabel(matches[0], coord, true);
             galleryLabels.put(Integer.parseInt(label.getText()), label);
 
