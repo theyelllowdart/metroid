@@ -16,7 +16,7 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
   private final Context context;
 
   // If you change the database schema, you must increment the database version.
-  public static final int DATABASE_VERSION = 22;
+  public static final int DATABASE_VERSION = 25;
   public static final String DATABASE_NAME = "FeedReader.db";
 
   public FeedReaderDbHelper(Context context) {
@@ -75,6 +75,17 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
               values.put("uri", matches[4]);
             }
             db.insert("processed_media", null, values);
+        }
+      }
+      try (CSVReader reader = new CSVReader(
+          new InputStreamReader(context.getResources().openRawResource(R.raw.object_location)))) {
+        String[] matches;
+        while ((matches = reader.readNext()) != null) {
+          ContentValues values = new ContentValues();
+          values.put("objectId", matches[0]);
+          values.put("x", matches[1]);
+          values.put("y", matches[2]);
+          db.insert("object_location", null, values);
         }
       }
     } catch (IOException e) {

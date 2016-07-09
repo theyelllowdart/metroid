@@ -162,14 +162,14 @@ public class LargeMapView extends ImageView {
     clipBoundsF.set(clipBounds);
     for (PaintGallery paintGallery : paintRecs) {
       final GalleryViewRect rect = paintGallery.getRect();
-//      final Paint paint = paintGallery.getPaint();
+      final Paint paint = paintGallery.getPaint();
       final GalleryLabel label = paintGallery.getLabel();
 
       final RectF scaled = rect.getScaled();
       getImageMatrix().mapRect(galleryBoundsDest, scaled);
 
       if (RectF.intersects(galleryBoundsDest, clipBoundsF)) {
-//        canvas.drawRect(galleryBoundsDest, paint);
+        canvas.drawRect(galleryBoundsDest, paint);
 
         if (label.isHorizontal()) {
           horizontalTextMatrix.mapPoints(galleryTextDest, label.getCoord());
