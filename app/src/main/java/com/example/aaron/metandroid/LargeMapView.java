@@ -57,6 +57,9 @@ public class LargeMapView extends ImageView {
       paint.setColor(random.nextInt());
       paint.setStyle(Paint.Style.FILL);
       paint.setAlpha(90);
+      GalleryLabel label =  MyApplication.galleryLabels.get(rect.getId());
+      if (label == null)
+        throw new RuntimeException(String.valueOf(rect.getId()));
       paintRecs.add(new PaintGallery(rect, paint, MyApplication.galleryLabels.get(rect.getId())));
     }
 
@@ -162,14 +165,14 @@ public class LargeMapView extends ImageView {
     clipBoundsF.set(clipBounds);
     for (PaintGallery paintGallery : paintRecs) {
       final GalleryViewRect rect = paintGallery.getRect();
-//      final Paint paint = paintGallery.getPaint();
+      final Paint paint = paintGallery.getPaint();
       final GalleryLabel label = paintGallery.getLabel();
 
       final RectF scaled = rect.getScaled();
       getImageMatrix().mapRect(galleryBoundsDest, scaled);
 
       if (RectF.intersects(galleryBoundsDest, clipBoundsF)) {
-//        canvas.drawRect(galleryBoundsDest, paint);
+        canvas.drawRect(galleryBoundsDest, paint);
 
         if (label.isHorizontal()) {
           horizontalTextMatrix.mapPoints(galleryTextDest, label.getCoord());
