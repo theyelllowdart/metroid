@@ -13,7 +13,7 @@
   <com.example.aaron.metandroid.LargeMapView
     android:id="@+id/largeMap"
     android:layout_width="match_parent"
-    android:background="#FAFAFA"
+    android:background="#F9FFE9"
     android:layout_height="0dip"
     android:layout_weight=".5"
     android:scaleType="matrix"
@@ -55,6 +55,8 @@
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
       android:background="@android:color/white"
+      android:paddingTop="10dp"
+      android:paddingBottom="10dp"
       android:text="Accept"
       android:textStyle="bold"/>
 

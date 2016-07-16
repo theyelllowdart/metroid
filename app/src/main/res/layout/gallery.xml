@@ -5,7 +5,7 @@
               android:orientation="vertical"
               android:paddingEnd="1dp"
               android:paddingStart="1dp"
-              android:paddingTop="5dp">
+              android:paddingTop="10dp">
 
   <View
     android:layout_width="match_parent"
@@ -16,6 +16,8 @@
     android:id="@+id/title"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
     android:textStyle="bold"/>
 
   <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -34,6 +36,8 @@
         android:id="@+id/audio0"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:visibility="gone"/>
 
       <View
@@ -47,6 +51,8 @@
         android:id="@+id/audio1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:visibility="gone"/>
 
       <View
@@ -59,6 +65,8 @@
         android:id="@+id/audio2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:visibility="gone"/>
 
       <View
@@ -71,6 +79,8 @@
         android:id="@+id/audio3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:visibility="gone"/>
 
       <View
@@ -83,6 +93,8 @@
         android:id="@+id/audio4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:visibility="gone"/>
 
       <View
@@ -95,14 +107,16 @@
         android:id="@+id/audio5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:visibility="gone"/>
     </LinearLayout>
 
     <ImageView
       android:id="@+id/objectImage"
-      android:layout_width="75dp"
-      android:layout_height="75dp"
-      android:layout_marginEnd="5dp"
+      android:layout_width="710dp"
+      android:layout_height="710dp"
+      android:layout_marginEnd="10dp"
       android:layout_weight="0"
       android:background="@android:color/darker_gray"
       android:contentDescription="!"/>
