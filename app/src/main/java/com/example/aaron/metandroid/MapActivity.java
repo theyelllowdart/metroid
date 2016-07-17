@@ -1,14 +1,13 @@
 package com.example.aaron.metandroid;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
@@ -16,7 +15,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
@@ -25,6 +23,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -33,23 +32,20 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
+import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -223,8 +219,34 @@ public class MapActivity extends Activity {
               }
               stopModels.add(stopModel);
             }
-            Collections.sort(stopModels);
-            galleryAdapter.addAll(stopModels);
+
+            ArrayList<ArtObjectRow> rows = new ArrayList<>();
+            for (int i = 0; i < stopModels.size(); i++) {
+              StopModel stopModel1 = stopModels.get(i);
+              StopModel stopModel2 = null;
+              int height = stopModel1.getHeight();
+              int width = stopModel1.getWidth();
+              double ratio = width / (double) height;
+              if (ratio <= 1.3) {
+                int nextPortrait = -1;
+                for (int j = i + 1; j < stopModels.size(); j++) {
+                  StopModel stopModel = stopModels.get(j);
+                  if ((stopModel.getWidth() / (double) stopModel.getHeight()) <= 1.3) {
+                    nextPortrait = j;
+                    break;
+                  }
+                }
+                if (nextPortrait != -1) {
+                  Collections.swap(stopModels, i + 1, nextPortrait);
+                  stopModel2 = stopModels.get(i + 1);
+                  i++;
+                }
+              }
+              rows.add(new ArtObjectRow(stopModel1, stopModel2));
+            }
+
+//            Collections.sort(stopModels);
+            galleryAdapter.addAll(rows);
             galleriesView.setSelection(0);
 
 
@@ -343,7 +365,7 @@ public class MapActivity extends Activity {
                   } catch (JSONException e) {
                     Log.e("upload-missing-stop", e.getMessage(), e);
                   }
-                  InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                  InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                   imm.hideSoftInputFromWindow(missingStopNumberButton.getWindowToken(), 0);
 
                   galleryDetail.setVisibility(View.VISIBLE);
@@ -359,42 +381,23 @@ public class MapActivity extends Activity {
     }
   }
 
-  private class GalleryAdapter extends ArrayAdapter<StopModel> {
+  private class GalleryAdapter extends ArrayAdapter<ArtObjectRow> {
 
     public GalleryAdapter(Context context, int resource) {
       super(context, resource);
     }
 
-    class GalleryHolder {
-      private final TextView titleView;
-      private final ImageView imageView;
-      private final ArrayList<TextView> audioTextViews = new ArrayList<>(6);
-      private final ArrayList<View> audioDividers = new ArrayList<>(6);
+    class GalleryHolder2 {
+      private final ImageView imageView1;
+      private final ImageView imageView2;
+      private final RelativeLayout image1Layout;
+      private TextView image1Text;
 
-      public GalleryHolder(TextView titleView, ImageView imageView,
-                           TextView audio0, TextView audio1, TextView audio2, TextView audio3,
-                           TextView audio4, TextView audio5, View divider0, View divider1, View divider2, View divider3, View divider4) {
-        this.titleView = titleView;
-        this.imageView = imageView;
-        this.audioTextViews.add(audio0);
-        this.audioTextViews.add(audio1);
-        this.audioTextViews.add(audio2);
-        this.audioTextViews.add(audio3);
-        this.audioTextViews.add(audio4);
-        this.audioTextViews.add(audio5);
-        this.audioDividers.add(divider0);
-        this.audioDividers.add(divider1);
-        this.audioDividers.add(divider2);
-        this.audioDividers.add(divider3);
-        this.audioDividers.add(divider4);
-      }
-
-      public TextView getAudio(int i) {
-        return audioTextViews.get(i);
-      }
-
-      public View getDivider(int i) {
-        return audioDividers.get(i);
+      public GalleryHolder2(ImageView imageView1, ImageView imageView2, RelativeLayout image1Layout, TextView image1Text) {
+        this.imageView1 = imageView1;
+        this.imageView2 = imageView2;
+        this.image1Layout = image1Layout;
+        this.image1Text = image1Text;
       }
     }
 
@@ -405,153 +408,138 @@ public class MapActivity extends Activity {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-      final StopModel model = getItem(position);
+      final ArtObjectRow row = getItem(position);
       if (convertView == null) {
-        convertView = LayoutInflater.from(getContext()).inflate(R.layout.gallery, parent, false);
-        GalleryHolder holder = new GalleryHolder(
-            (TextView) convertView.findViewById(R.id.title),
-            (ImageView) convertView.findViewById(R.id.objectImage),
-            (TextView) convertView.findViewById(R.id.audio0),
-            (TextView) convertView.findViewById(R.id.audio1),
-            (TextView) convertView.findViewById(R.id.audio2),
-            (TextView) convertView.findViewById(R.id.audio3),
-            (TextView) convertView.findViewById(R.id.audio4),
-            (TextView) convertView.findViewById(R.id.audio5),
-            convertView.findViewById(R.id.audioDivider0),
-            convertView.findViewById(R.id.audioDivider1),
-            convertView.findViewById(R.id.audioDivider2),
-            convertView.findViewById(R.id.audioDivider3),
-            convertView.findViewById(R.id.audioDivider4)
+        convertView = LayoutInflater.from(getContext()).inflate(R.layout.gallery2, parent, false);
+        GalleryHolder2 holder = new GalleryHolder2(
+            (ImageView) convertView.findViewById(R.id.objectImage1),
+            (ImageView) convertView.findViewById(R.id.objectImage2),
+            (RelativeLayout) convertView.findViewById(R.id.objectImage1Layout),
+            (TextView) convertView.findViewById(R.id.objectImage1Text)
         );
         convertView.setTag(holder);
       }
-      final GalleryHolder holder = (GalleryHolder) convertView.getTag();
-      holder.titleView.setText((position + 1) + ". " + model.getTitle());
+      final GalleryHolder2 holder = (GalleryHolder2) convertView.getTag();
 
 
-      float imageScale = (75.0f * density) / model.getWidth();
-      holder.imageView.getLayoutParams().width = Math.round(imageScale * model.getWidth());
-      holder.imageView.getLayoutParams().height = Math.round(imageScale * model.getHeight());
-
-      Glide.with(getContext())
-          .load(model.getImageURL())
-          .diskCacheStrategy(DiskCacheStrategy.RESULT)
-          .fitCenter()
-          .override(Math.round(imageScale * model.getWidth()), Math.round(imageScale * model.getHeight()))
-          .into(holder.imageView);
-
-      int mediaSize = model.getMedias().size();
-      for (int i = 0; i < 6; i++) {
-        TextView audioTitle = holder.getAudio(i);
-        audioTitle.setOnClickListener(null);
-        audioTitle.setVisibility(View.GONE);
-        if (i < 5) {
-          holder.getDivider(i).setVisibility(View.GONE);
-        }
-        if (i < mediaSize) {
-          if (i > 0) {
-            holder.getDivider(i - 1).setVisibility(View.VISIBLE);
-          }
-          audioTitle.setVisibility(View.VISIBLE);
-          final MediaModel media = model.getMedias().get(i);
-          final ArrayList<MediaModel> queue = new ArrayList<>();
-          for (int j = i + 1; j < model.getMedias().size(); j++) {
-            queue.add(model.getMedias().get(j));
-          }
-          audioTitle.setText(media.getTitle());
-          if (!media.getTitle().equals("Broken link")) {
-            audioTitle.setOnClickListener(new View.OnClickListener() {
-              @Override
-              public void onClick(View v) {
-                try {
-                  myPlayer.play(media.getUri(), media.getTitle(), queue);
-                } catch (IOException e) {
-                  throw new RuntimeException(e);
-                }
-              }
-            });
-          }
-        }
+      int total;
+      if (row.getModel2() != null) {
+        total = 2;
+      } else {
+        total = 1;
       }
 
-      holder.titleView.setOnLongClickListener(new OnLongClickListener() {
-        @Override
-        public boolean onLongClick(View v) {
-          galleryDetail.setVisibility(View.GONE);
-          moveButtons.setVisibility(View.VISIBLE);
-          largeMapView.setPinToPlace(position + 1);
-          acceptButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              PointF pinLocation = largeMapView.getPinLocation();
-              Matrix matrix = new Matrix();
-              largeMapPhotoView.getDisplayMatrix().invert(matrix);
-              float[] coordinates = new float[]{pinLocation.x, pinLocation.y};
-              matrix.mapPoints(coordinates);
+      if (total == 2) {
+        holder.imageView2.setVisibility(View.VISIBLE);
+      } else {
+        holder.imageView2.setVisibility(View.GONE);
+      }
 
-              float x = coordinates[0] / density;
-              float y = coordinates[1] / density;
-              SQLiteDatabase db = new FeedReaderDbHelper(getApplicationContext()).getWritableDatabase();
-              ContentValues contentValues = new ContentValues();
-              contentValues.put("objectId", model.getArtObjectId());
-              contentValues.put("x", x);
-              contentValues.put("y", y);
-              db.insertWithOnConflict("object_location", "objectId", contentValues, SQLiteDatabase.CONFLICT_REPLACE);
-              galleryDetail.setVisibility(View.VISIBLE);
-              moveButtons.setVisibility(View.GONE);
 
-              String androidId = Settings.Secure.getString(getContext().getContentResolver(),
-                  Settings.Secure.ANDROID_ID);
-              try {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("objectId", model.getArtObjectId());
-                jsonObject.put("x", x);
-                jsonObject.put("y", y);
-                jsonObject.put("user", androidId);
-                jsonObject.put("created", System.currentTimeMillis());
-                JsonObjectRequest request = new JsonObjectRequest(
-                    Request.Method.POST,
-                    "https://glacial-everglades-23026.herokuapp.com/location",
-                    jsonObject,
-                    new Response.Listener<JSONObject>() {
-                      @Override
-                      public void onResponse(JSONObject response) {
+      for (int i = 0; i < total; i++) {
+        StopModel model;
+        ImageView imageView;
 
-                      }
-                    },
-                    new Response.ErrorListener() {
-                      @Override
-                      public void onErrorResponse(VolleyError error) {
-
-                      }
-                    }
-                );
-                queue.add(request);
-              } catch (JSONException e) {
-                Log.e("upload-location", e.getMessage(), e);
-              }
-              ArrayList<ArtObjectLocation> newLocations = new ArrayList<ArtObjectLocation>();
-              for (ArtObjectLocation location : largeMapView.getLocations()) {
-                if (location.getId().equals(model.getArtObjectId())) {
-                  ArtObjectLocation newLocation = new ArtObjectLocation(
-                      location.getId(),
-                      location.getPosition(),
-                      coordinates[0],
-                      coordinates[1]
-                  );
-                  newLocations.add(newLocation);
-                } else {
-                  newLocations.add(location);
-                }
-              }
-              largeMapView.setPins(newLocations);
-              largeMapView.clearPinToPlace();
-            }
-          });
-          return true;
+        int width = 200;
+        int height = 200;
+        if (i == 0) {
+          model = row.getModel1();
+          imageView = holder.imageView1;
+          if ((model.getWidth() / (double) model.getHeight()) > 1.3) {
+            width = width * 2;
+          }
+        } else {
+          model = row.getModel2();
+          imageView = holder.imageView2;
         }
-      });
+
+        float imageScale = (width * density) / model.getWidth();
+        if (total == 2) {
+          imageView.getLayoutParams().width = Math.round(200 * density);
+        } else {
+          imageView.getLayoutParams().width = Math.round(400 * density);
+        }
+        imageView.getLayoutParams().height = Math.round(height * density);
+
+
+        holder.image1Layout.getLayoutParams().height = imageView.getLayoutParams().height;
+        holder.image1Layout.getLayoutParams().width = imageView.getLayoutParams().width;
+        holder.image1Text.setText(model.getTitle());
+
+        Glide.with(getContext())
+            .load(model.getImageURL())
+            .diskCacheStrategy(DiskCacheStrategy.RESULT)
+//            .centerCrop()
+            .transform(new CenterTopTranformation(getContext()))
+            .override(Math.round(imageScale * model.getWidth()), Math.round(height * density))
+            .into(imageView);
+      }
       return convertView;
     }
   }
+
+  private class CenterTopTranformation extends BitmapTransformation {
+
+    public CenterTopTranformation(Context context) {
+      super(context);
+    }
+
+    public CenterTopTranformation(BitmapPool bitmapPool) {
+      super(bitmapPool);
+    }
+
+
+    private Bitmap transform(Bitmap recycled, Bitmap toCrop, int width, int height) {
+      if (toCrop == null) {
+        return null;
+      } else if (toCrop.getWidth() == width && toCrop.getHeight() == height) {
+        return toCrop;
+      }
+      // From ImageView/Bitmap.createScaledBitmap.
+      final float scale;
+      float dx = 0;
+      Matrix m = new Matrix();
+      if (toCrop.getWidth() * height > width * toCrop.getHeight()) {
+        scale = (float) height / (float) toCrop.getHeight();
+        dx = (width - toCrop.getWidth() * scale) * 0.5f;
+      } else {
+        scale = (float) width / (float) toCrop.getWidth();
+      }
+
+      m.setScale(scale, scale);
+      m.postTranslate((int) (dx + 0.5f), 0);
+      final Bitmap result;
+      if (recycled != null) {
+        result = recycled;
+      } else {
+        result = Bitmap.createBitmap(width, height, toCrop.getConfig() != null ? toCrop.getConfig() : Bitmap.Config.ARGB_8888);
+      }
+
+      // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
+      TransformationUtils.setAlpha(toCrop, result);
+
+      Canvas canvas = new Canvas(result);
+      Paint paint = new Paint(TransformationUtils.PAINT_FLAGS);
+      canvas.drawBitmap(toCrop, m, paint);
+      return result;
+    }
+
+    @Override
+    protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
+      final Bitmap toReuse = pool.get(outWidth, outHeight, toTransform.getConfig() != null
+          ? toTransform.getConfig() : Bitmap.Config.ARGB_8888);
+
+      Bitmap transformed = transform(toReuse, toTransform, outWidth, outHeight);
+      if (toReuse != null && toReuse != transformed && !pool.put(toReuse)) {
+        toReuse.recycle();
+      }
+      return transformed;
+    }
+
+    @Override
+    public String getId() {
+      return "yo";
+    }
+  }
 }
+

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="horizontal"
+              android:paddingTop="4dp">
+
+  <RelativeLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="4dp"
+    android:layout_marginEnd="4dp"
+    android:id="@+id/objectImage1Layout">
+
+    <ImageView
+      android:id="@+id/objectImage1"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_weight="0"
+      android:background="@android:color/darker_gray"
+      android:contentDescription="!"/>
+
+    <View
+      android:layout_alignParentBottom="true"
+      android:layout_width="match_parent"
+      android:layout_height="54dp"
+      android:background="#000"
+      android:alpha=".5"/>
+
+    <LinearLayout
+      android:layout_alignParentBottom="true"
+      android:orientation="horizontal"
+      android:layout_width="match_parent"
+      android:layout_height="54dp">
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:layout_marginLeft="4dp"
+        android:background="#FFF"
+        android:text="10"
+        android:alpha=".9"
+        android:gravity="center_vertical"
+        android:layout_gravity="center_vertical"
+        android:textColor="#000"
+        android:textSize="20sp"/>
+
+      <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:text="Juneja Art Gallery"
+        android:textColor="#FFF"
+        android:id="@+id/objectImage1Text"
+        android:gravity="center_vertical"
+        android:layout_gravity="center_vertical"
+        android:textSize="15sp"/>
+
+
+
+    </LinearLayout>
+
+  </RelativeLayout>
+
+
+  <ImageView
+    android:id="@+id/objectImage2"
+    android:layout_width="710dp"
+    android:layout_height="710dp"
+    android:layout_weight="0"
+    android:background="@android:color/darker_gray"
+    android:contentDescription="!"/>
+
+</LinearLayout>
