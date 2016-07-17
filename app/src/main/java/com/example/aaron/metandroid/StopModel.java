@@ -4,14 +4,17 @@ import com.google.common.collect.ComparisonChain;
 
 import java.util.ArrayList;
 
-public class StopModel implements Comparable<StopModel> {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class StopModel implements Comparable<StopModel>, Parcelable {
   private final String artObjectId;
   private final int galleryId;
   private final int width;
   private final int height;
   private final String title;
   private final String imageURL;
-  private final ArrayList<MediaModel> medias = new ArrayList<>();
+  private final ArrayList<MediaModel> medias;
 
   public StopModel(String artObjectId, int galleryId, int width, int height, String title, String imageURL) {
     this.artObjectId = artObjectId;
@@ -20,6 +23,7 @@ public class StopModel implements Comparable<StopModel> {
     this.height = height;
     this.title = title;
     this.imageURL = imageURL;
+    this.medias = new ArrayList<>();
   }
 
   public String getArtObjectId() {
@@ -75,4 +79,43 @@ public class StopModel implements Comparable<StopModel> {
   public int getHeight() {
     return height;
   }
+
+
+  @Override
+  public int describeContents() {
+    return 0;
+  }
+
+  @Override
+  public void writeToParcel(Parcel dest, int flags) {
+    dest.writeString(this.artObjectId);
+    dest.writeInt(this.galleryId);
+    dest.writeInt(this.width);
+    dest.writeInt(this.height);
+    dest.writeString(this.title);
+    dest.writeString(this.imageURL);
+    dest.writeTypedList(this.medias);
+  }
+
+  protected StopModel(Parcel in) {
+    this.artObjectId = in.readString();
+    this.galleryId = in.readInt();
+    this.width = in.readInt();
+    this.height = in.readInt();
+    this.title = in.readString();
+    this.imageURL = in.readString();
+    this.medias = in.createTypedArrayList(MediaModel.CREATOR);
+  }
+
+  public static final Creator<StopModel> CREATOR = new Creator<StopModel>() {
+    @Override
+    public StopModel createFromParcel(Parcel source) {
+      return new StopModel(source);
+    }
+
+    @Override
+    public StopModel[] newArray(int size) {
+      return new StopModel[size];
+    }
+  };
 }
