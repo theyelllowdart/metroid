@@ -44,15 +44,17 @@ import com.google.common.collect.Iterables;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 
-public class MapActivity extends Activity {
+public class MapActivity extends Activity implements ObjectListFragment.OnObjectSelectListener, ObjectDetailFragment.OnMediaSelectListener {
 
   private Float density;
   private MyPlayer myPlayer;
@@ -71,6 +73,25 @@ public class MapActivity extends Activity {
   private EditText missingStopNumberButton;
   private RequestQueue queue;
   private Activity mainActivity;
+
+  @Override
+  public void onObjectSelected(StopModel model) {
+    mainActivity.getFragmentManager()
+        .beginTransaction()
+        .replace(R.id.fragment_container, ObjectDetailFragment.create(model))
+        .addToBackStack(null)
+        .commit();
+  }
+
+  @Override
+  public void onMediaSelected(List<MediaModel> models, int position) {
+    MediaModel model = models.get(position);
+    try {
+      myPlayer.play(model.getUri(), model.getTitle(), models);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 
   private class MyPhotoViewAttacher extends PhotoViewAttacher {
 

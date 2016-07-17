@@ -1,6 +1,6 @@
 package com.example.aaron.metandroid;
 
-import android.app.Fragment;
+import android.app.Activity;
 import android.app.ListFragment;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -13,11 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -26,13 +23,20 @@ import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ObjectListFragment extends ListFragment {
+  private OnObjectSelectListener selectCallback;
+  private float density;
 
-  float density;
-
-
+  @Override
+  public void onAttach(Activity activity) {
+    super.onAttach(activity);
+    try {
+      selectCallback = (OnObjectSelectListener) activity;
+    } catch (ClassCastException e) {
+      throw new ClassCastException(activity.toString() + " must implement OnObjectSelectListener");
+    }
+  }
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -188,12 +192,13 @@ public class ObjectListFragment extends ListFragment {
         imageView.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
-            Toast.makeText(getContext(), "yo", Toast.LENGTH_LONG).show();
+//            Toast.makeText(getContext(), "yo", Toast.LENGTH_LONG).show();
 //            mainActivity.getFragmentManager()
 //                .beginTransaction()
 //                .replace(R.id.fragment_container, ObjectDetailFragment.create(model.getTitle()))
 //                .addToBackStack("yo")
 //                .commit();
+            selectCallback.onObjectSelected(model);
 
           }
         });
@@ -260,5 +265,9 @@ public class ObjectListFragment extends ListFragment {
     public String getId() {
       return "yo";
     }
+  }
+
+  public interface OnObjectSelectListener {
+    void onObjectSelected(StopModel model);
   }
 }
