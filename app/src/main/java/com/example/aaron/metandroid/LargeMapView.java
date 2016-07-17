@@ -57,7 +57,7 @@ public class LargeMapView extends ImageView {
       paint.setColor(random.nextInt());
       paint.setStyle(Paint.Style.FILL);
       paint.setAlpha(90);
-      GalleryLabel label =  MyApplication.galleryLabels.get(rect.getId());
+      GalleryLabel label = MyApplication.galleryLabels.get(rect.getId());
       if (label == null)
         throw new RuntimeException(String.valueOf(rect.getId()));
       paintRecs.add(new PaintGallery(rect, paint, MyApplication.galleryLabels.get(rect.getId())));
@@ -98,7 +98,7 @@ public class LargeMapView extends ImageView {
 
   public void setPins(List<ArtObjectLocation> locations) {
     this.pins.clear();
-    for (ArtObjectLocation location: locations) {
+    for (ArtObjectLocation location : locations) {
       float halfPinSize = 5 * density;
       RectF rect = new RectF(
           location.getX() - halfPinSize,
@@ -123,13 +123,12 @@ public class LargeMapView extends ImageView {
   }
 
 
-
   public void setPinToPlace(int pinToPlace) {
     this.pinToPlace = pinToPlace;
     this.invalidate();
   }
 
-  public Integer getPinToPlace(){
+  public Integer getPinToPlace() {
     return this.pinToPlace;
   }
 
@@ -138,7 +137,7 @@ public class LargeMapView extends ImageView {
   }
 
   public Integer getPin(float x, float y) {
-    for(int i = 0; i < pins.size(); i++) {
+    for (int i = 0; i < pins.size(); i++) {
       RectF bound = pins.get(i).getRect();
       if (bound.contains(x, y)) {
         return i;
@@ -150,6 +149,7 @@ public class LargeMapView extends ImageView {
   @Override
   public void onDraw(Canvas canvas) {
     super.onDraw(canvas);
+
 
     getImageMatrix().getValues(imageMatrixValues);
     textPaint.setTextSize(8 * density * imageMatrixValues[Matrix.MSCALE_X]);
@@ -172,7 +172,7 @@ public class LargeMapView extends ImageView {
       getImageMatrix().mapRect(galleryBoundsDest, scaled);
 
       if (RectF.intersects(galleryBoundsDest, clipBoundsF)) {
-        canvas.drawRect(galleryBoundsDest, paint);
+//        canvas.drawRect(galleryBoundsDest, paint);
 
         if (label.isHorizontal()) {
           horizontalTextMatrix.mapPoints(galleryTextDest, label.getCoord());
@@ -203,6 +203,7 @@ public class LargeMapView extends ImageView {
     }
 
     pinBoundsList.clear();
+    ArrayList<DrawPinLabel> toDrawPinLabels = new ArrayList<>();
     for (DrawPin pin : pins) {
       float pointX;
       float pointY;
@@ -220,7 +221,7 @@ public class LargeMapView extends ImageView {
       float halfPinSize;
       if (pinToPlace != null && pinToPlace == pin.getPosition()) {
         halfPinSize = 5 * density * imageMatrixValues[Matrix.MSCALE_X];
-        pinBounds.set((getWidth() / 2.0f) - halfPinSize, (getHeight() / 2.0f) - (2 * halfPinSize), (getWidth() / 2.0f) + halfPinSize,  (getHeight() / 2.0f));
+        pinBounds.set((getWidth() / 2.0f) - halfPinSize, (getHeight() / 2.0f) - (2 * halfPinSize), (getWidth() / 2.0f) + halfPinSize, (getHeight() / 2.0f));
         pinLocation.set(pinBounds.centerX(), pinBounds.bottom);
       } else {
         halfPinSize = 5 * density;
@@ -231,15 +232,79 @@ public class LargeMapView extends ImageView {
       pinDrawable.setBounds(finalPinBounds);
       pinBoundsList.add(finalPinBounds);
       pinDrawable.setAlpha(alpha);
+
+      float pinArea = pin.getRect().height() * pin.getRect().width();
+      int intersectsPrevPinCount = 0;
+      for (DrawPin prevPin : pins) {
+        if (prevPin == pin) {
+          break;
+        }
+        if (RectF.intersects(prevPin.getRect(), pin.getRect())) {
+          float dx = Math.min(prevPin.getRect().right, pin.getRect().right) - Math.max(prevPin.getRect().left, pin.getRect().left);
+          float dy = Math.min(prevPin.getRect().bottom, pin.getRect().bottom) - Math.max(prevPin.getRect().top, pin.getRect().top);
+
+          if ((dx * dy) / pinArea > .50) {
+            intersectsPrevPinCount++;
+          }
+
+        }
+      }
+
+      int rotation = intersectsPrevPinCount == 0 ? 0 : intersectsPrevPinCount % 2 == 0 ? -35 : 35;
+      canvas.save();
+      canvas.rotate(rotation, finalPinBounds.centerX(), finalPinBounds.bottom);
       pinDrawable.draw(canvas);
+//      canvas.restore();
+
 
       TextPaint pinTextPaint = new TextPaint(textPaint);
       pinTextPaint.setColor(Color.RED);
       pinTextPaint.setAlpha(alpha);
+      pinTextPaint.setShadowLayer(4f, 1.5f, 1.3f, Color.argb(120, 0, 0, 0));
       pinTextPaint.setTextSize(4 * density * imageMatrixValues[Matrix.MSCALE_X]);
-      canvas.drawText(String.valueOf(pin.getPosition()), finalPinBounds.centerX(), finalPinBounds.centerY() - halfPinSize / 8, pinTextPaint);
+
+//      canvas.save();
+
+      float textX = finalPinBounds.centerX();
+      float texY = finalPinBounds.centerY() - halfPinSize / 8;
+//      canvas.rotate(rotation, textX, texY);
+      toDrawPinLabels.add(new DrawPinLabel(rotation, finalPinBounds.centerX(), finalPinBounds.bottom, String.valueOf(pin.getPosition()), textX, texY, pinTextPaint));
+      canvas.restore();
+    }
+    for (DrawPinLabel l : toDrawPinLabels) {
+      canvas.save();
+      canvas.rotate(l.rotation, l.rotationX, l.rotationY);
+      canvas.drawText(
+          l.title,
+          l.x,
+          l.y,
+          l.paint
+      );
+      canvas.restore();
     }
   }
+
+  private static class DrawPinLabel {
+    int rotation;
+    float rotationX;
+    float rotationY;
+
+    String title;
+    float x;
+    float y;
+    Paint paint;
+
+    public DrawPinLabel(int rotation, float rotationX, float rotationY, String title, float x, float y, Paint paint) {
+      this.rotation = rotation;
+      this.rotationX = rotationX;
+      this.rotationY = rotationY;
+      this.title = title;
+      this.x = x;
+      this.y = y;
+      this.paint = paint;
+    }
+  }
+
 
   private static class Polygon {
     private int[] polyY, polyX;
