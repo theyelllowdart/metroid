@@ -6,71 +6,114 @@
               android:paddingTop="4dp">
 
   <RelativeLayout
+    android:id="@+id/objectImage1Layout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_marginStart="4dp"
     android:layout_marginEnd="4dp"
-    android:id="@+id/objectImage1Layout">
+    android:layout_marginStart="4dp">
 
     <ImageView
       android:id="@+id/objectImage1"
       android:layout_width="match_parent"
       android:layout_height="match_parent"
-      android:layout_weight="0"
       android:background="@android:color/darker_gray"
       android:contentDescription="!"/>
 
     <View
-      android:layout_alignParentBottom="true"
       android:layout_width="match_parent"
       android:layout_height="54dp"
-      android:background="#000"
-      android:alpha=".5"/>
+      android:layout_alignParentBottom="true"
+      android:alpha=".5"
+      android:background="#000"/>
 
     <LinearLayout
-      android:layout_alignParentBottom="true"
-      android:orientation="horizontal"
       android:layout_width="match_parent"
-      android:layout_height="54dp">
+      android:layout_height="54dp"
+      android:layout_alignParentBottom="true"
+      android:orientation="horizontal">
 
       <TextView
+        android:id="@+id/objectImage1PinId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="4dp"
+        android:alpha=".9"
+        android:background="#FFF"
+        android:gravity="center_vertical"
         android:paddingLeft="4dp"
         android:paddingRight="4dp"
-        android:layout_marginLeft="4dp"
-        android:background="#FFF"
         android:text="10"
-        android:alpha=".9"
-        android:gravity="center_vertical"
-        android:layout_gravity="center_vertical"
         android:textColor="#000"
         android:textSize="20sp"/>
 
       <TextView
+        android:id="@+id/objectImage1Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:gravity="center_vertical"
         android:padding="8dp"
         android:text="Juneja Art Gallery"
         android:textColor="#FFF"
-        android:id="@+id/objectImage1Text"
-        android:gravity="center_vertical"
-        android:layout_gravity="center_vertical"
         android:textSize="15sp"/>
-
-
-
     </LinearLayout>
 
   </RelativeLayout>
 
 
-  <ImageView
-    android:id="@+id/objectImage2"
-    android:layout_width="710dp"
-    android:layout_height="710dp"
-    android:layout_weight="0"
-    android:background="@android:color/darker_gray"
-    android:contentDescription="!"/>
+  <RelativeLayout
+    android:id="@+id/objectImage2Layout"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="4dp"
+    android:layout_marginStart="4dp">
 
+    <ImageView
+      android:id="@+id/objectImage2"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:background="@android:color/darker_gray"
+      android:contentDescription="!"/>
+
+    <View
+      android:layout_width="match_parent"
+      android:layout_height="54dp"
+      android:layout_alignParentBottom="true"
+      android:alpha=".5"
+      android:background="#000"/>
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="54dp"
+      android:layout_alignParentBottom="true"
+      android:orientation="horizontal">
+
+      <TextView
+        android:id="@+id/objectImage2PinId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="4dp"
+        android:alpha=".9"
+        android:background="#FFF"
+        android:gravity="center_vertical"
+        android:paddingLeft="4dp"
+        android:paddingRight="4dp"
+        android:text="10"
+        android:textColor="#000"
+        android:textSize="20sp"/>
+
+      <TextView
+        android:id="@+id/objectImage2Tilte"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:gravity="center_vertical"
+        android:padding="8dp"
+        android:text="Juneja Art Gallery"
+        android:textColor="#FFF"
+        android:textSize="15sp"/>
+    </LinearLayout>
+  </RelativeLayout>
 </LinearLayout>

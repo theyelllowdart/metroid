@@ -390,14 +390,23 @@ public class MapActivity extends Activity {
     class GalleryHolder2 {
       private final ImageView imageView1;
       private final ImageView imageView2;
-      private final RelativeLayout image1Layout;
+      private final RelativeLayout layout1;
+      private final RelativeLayout layout2;
+      private final TextView pinId1;
+      private final TextView pinId2;
+      private final TextView title1;
+      private final TextView title2;
       private TextView image1Text;
 
-      public GalleryHolder2(ImageView imageView1, ImageView imageView2, RelativeLayout image1Layout, TextView image1Text) {
+      public GalleryHolder2(ImageView imageView1, ImageView imageView2, RelativeLayout layout1, RelativeLayout layout2, TextView pinId1, TextView pinId2, TextView title1, TextView title2) {
         this.imageView1 = imageView1;
         this.imageView2 = imageView2;
-        this.image1Layout = image1Layout;
-        this.image1Text = image1Text;
+        this.layout1 = layout1;
+        this.layout2 = layout2;
+        this.pinId1 = pinId1;
+        this.pinId2 = pinId2;
+        this.title1 = title1;
+        this.title2 = title2;
       }
     }
 
@@ -415,7 +424,11 @@ public class MapActivity extends Activity {
             (ImageView) convertView.findViewById(R.id.objectImage1),
             (ImageView) convertView.findViewById(R.id.objectImage2),
             (RelativeLayout) convertView.findViewById(R.id.objectImage1Layout),
-            (TextView) convertView.findViewById(R.id.objectImage1Text)
+            (RelativeLayout) convertView.findViewById(R.id.objectImage2Layout),
+            (TextView) convertView.findViewById(R.id.objectImage1PinId),
+            (TextView) convertView.findViewById(R.id.objectImage2PinId),
+            (TextView) convertView.findViewById(R.id.objectImage1Title),
+            (TextView) convertView.findViewById(R.id.objectImage2Tilte)
         );
         convertView.setTag(holder);
       }
@@ -439,16 +452,25 @@ public class MapActivity extends Activity {
       for (int i = 0; i < total; i++) {
         StopModel model;
         ImageView imageView;
+        RelativeLayout layout;
+        TextView title;
+        TextView pinId;
 
         int width = 200;
         int height = 200;
         if (i == 0) {
+          layout = holder.layout1;
+          title = holder.title1;
+          pinId = holder.pinId1;
           model = row.getModel1();
           imageView = holder.imageView1;
           if ((model.getWidth() / (double) model.getHeight()) > 1.3) {
             width = width * 2;
           }
         } else {
+          layout = holder.layout2;
+          title = holder.title2;
+          pinId = holder.pinId2;
           model = row.getModel2();
           imageView = holder.imageView2;
         }
@@ -462,9 +484,10 @@ public class MapActivity extends Activity {
         imageView.getLayoutParams().height = Math.round(height * density);
 
 
-        holder.image1Layout.getLayoutParams().height = imageView.getLayoutParams().height;
-        holder.image1Layout.getLayoutParams().width = imageView.getLayoutParams().width;
-        holder.image1Text.setText(model.getTitle());
+        layout.getLayoutParams().height = imageView.getLayoutParams().height;
+        layout.getLayoutParams().width = imageView.getLayoutParams().width;
+        title.setText(model.getTitle());
+        pinId.setText(String.valueOf(position + 1));
 
         Glide.with(getContext())
             .load(model.getImageURL())
