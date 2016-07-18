@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid;
+package com.example.aaron.metandroid.fragment;
 
 import android.app.Activity;
 import android.app.ListFragment;
@@ -21,6 +21,9 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
+import com.example.aaron.metandroid.R;
+import com.example.aaron.metandroid.model.ArtObjectRow;
+import com.example.aaron.metandroid.model.StopModel;
 
 import java.util.ArrayList;
 

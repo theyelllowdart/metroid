@@ -1,10 +1,12 @@
-package com.example.aaron.metandroid;
+package com.example.aaron.metandroid.util;
 
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+
+import com.example.aaron.metandroid.R;
 
 import java.io.BufferedReader;
 import java.io.IOException;

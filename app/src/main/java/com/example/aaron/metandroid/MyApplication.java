@@ -2,6 +2,9 @@ package com.example.aaron.metandroid;
 
 import android.app.Application;
 
+import com.example.aaron.metandroid.model.GalleryLabel;
+import com.example.aaron.metandroid.model.GalleryViewRect;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashMap;

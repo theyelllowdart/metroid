@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid;
+package com.example.aaron.metandroid.model;
 
 import com.google.common.collect.ComparisonChain;
 

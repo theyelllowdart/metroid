@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid;
+package com.example.aaron.metandroid.fragment;
 
 import android.app.Activity;
 import android.content.Context;
@@ -27,6 +27,15 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.aaron.metandroid.MyApplication;
+import com.example.aaron.metandroid.R;
+import com.example.aaron.metandroid.model.ArtObjectLocation;
+import com.example.aaron.metandroid.model.ArtObjectRow;
+import com.example.aaron.metandroid.model.MediaModel;
+import com.example.aaron.metandroid.util.FeedReaderDbHelper;
+import com.example.aaron.metandroid.model.GalleryViewRect;
+import com.example.aaron.metandroid.model.QueryModel;
+import com.example.aaron.metandroid.model.StopModel;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 

@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid;
+package com.example.aaron.metandroid.model;
 
 public class QueryModel {
     private final String title;

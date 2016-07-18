@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid;
+package com.example.aaron.metandroid.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;

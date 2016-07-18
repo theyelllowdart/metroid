@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid;
+package com.example.aaron.metandroid.fragment;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -10,10 +10,15 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.VectorDrawable;
-import android.location.Location;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.widget.ImageView;
+
+import com.example.aaron.metandroid.MyApplication;
+import com.example.aaron.metandroid.R;
+import com.example.aaron.metandroid.model.ArtObjectLocation;
+import com.example.aaron.metandroid.model.GalleryLabel;
+import com.example.aaron.metandroid.model.GalleryViewRect;
 
 import java.io.IOException;
 import java.util.*;

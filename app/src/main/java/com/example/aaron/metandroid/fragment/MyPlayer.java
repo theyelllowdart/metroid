@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid;
+package com.example.aaron.metandroid.fragment;
 
 import android.annotation.SuppressLint;
 import android.media.AudioManager;
@@ -9,6 +9,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import com.example.aaron.metandroid.model.MediaModel;
 
 import java.io.IOException;
 import java.util.ArrayList;

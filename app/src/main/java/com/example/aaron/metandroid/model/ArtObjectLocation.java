@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid;
+package com.example.aaron.metandroid.model;
 
 public class ArtObjectLocation {
   private final String id;

@@ -1,9 +1,10 @@
-package com.example.aaron.metandroid;
+package com.example.aaron.metandroid.model;
 
-import android.graphics.Rect;
 import android.graphics.RectF;
 
-public class GalleryViewRect implements GalleryView{
+import com.example.aaron.metandroid.model.GalleryView;
+
+public class GalleryViewRect implements GalleryView {
     private final int id;
     private final RectF scaled;
 

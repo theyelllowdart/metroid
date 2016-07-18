@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid;
+package com.example.aaron.metandroid.fragment;
 
 import android.app.Activity;
 import android.app.ListFragment;
@@ -11,7 +11,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.common.collect.Lists;
+import com.example.aaron.metandroid.R;
+import com.example.aaron.metandroid.model.MediaModel;
+import com.example.aaron.metandroid.model.StopModel;
 
 import java.util.List;
 
