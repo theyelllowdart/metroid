@@ -148,7 +148,7 @@ public class ObjectListFragment extends ListFragment {
         ImageView imageView;
         RelativeLayout layout;
         TextView title;
-        TextView pinId;
+        final TextView pinId;
 
         int width = 200;
         int height = 200;
@@ -201,7 +201,7 @@ public class ObjectListFragment extends ListFragment {
 //                .replace(R.id.fragment_container, ObjectDetailFragment.create(model.getTitle()))
 //                .addToBackStack("yo")
 //                .commit();
-            selectCallback.onObjectSelected(model);
+            selectCallback.onObjectSelected(model, position);
 
           }
         });
@@ -271,6 +271,6 @@ public class ObjectListFragment extends ListFragment {
   }
 
   public interface OnObjectSelectListener {
-    void onObjectSelected(StopModel model);
+    void onObjectSelected(StopModel model, int position);
   }
 }

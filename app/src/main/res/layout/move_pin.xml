@@ -10,15 +10,10 @@
     android:layout_height="wrap_content"
     android:textStyle="bold"/>
 
-  <ListView
-    android:id="@android:id/list"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"/>
-
   <Button
     android:id="@+id/movePin"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:text="Move Pin"/>
+    android:text="Accept"/>
 
 </LinearLayout>

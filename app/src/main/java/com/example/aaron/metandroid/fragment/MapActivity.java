@@ -1,6 +1,7 @@
 package com.example.aaron.metandroid.fragment;
 
 import android.app.Activity;
+import android.app.FragmentManager;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -52,7 +53,7 @@ import java.util.List;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 
-public class MapActivity extends Activity implements ObjectListFragment.OnObjectSelectListener, ObjectDetailFragment.OnMediaSelectListener {
+public class MapActivity extends Activity implements ObjectListFragment.OnObjectSelectListener, ObjectDetailFragment.OnMediaSelectListener, ObjectDetailFragment.OnMoveSelectListener, ObjectMoveFragment.OnExitMoveModeListener {
 
   private Float density;
   private MyPlayer myPlayer;
@@ -73,10 +74,11 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
   private Activity mainActivity;
 
   @Override
-  public void onObjectSelected(StopModel model) {
-    mainActivity.getFragmentManager()
+  public void onObjectSelected(StopModel model, int pinNumber) {
+    mainActivity
+        .getFragmentManager()
         .beginTransaction()
-        .replace(R.id.fragment_container, ObjectDetailFragment.create(model))
+        .replace(R.id.fragment_container, ObjectDetailFragment.create(model, pinNumber))
         .addToBackStack(null)
         .commit();
   }
@@ -89,6 +91,22 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  @Override
+  public void onMediaSelected(StopModel model, int pinNumber) {
+    largeMapView.setPinToPlace(pinNumber);
+    mainActivity
+        .getFragmentManager()
+        .beginTransaction()
+        .replace(R.id.fragment_container, ObjectMoveFragment.create(model, pinNumber))
+        .addToBackStack(null)
+        .commit();
+  }
+
+  @Override
+  public void onExitMoveMode() {
+    largeMapView.clearPinToPlace();
   }
 
   private class MyPhotoViewAttacher extends PhotoViewAttacher {
@@ -153,6 +171,13 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
         .beginTransaction()
         .replace(R.id.fragment_container, ObjectListFragment.create(0, null))
         .commit();
+
+    mainActivity.getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+      @Override
+      public void onBackStackChanged() {
+        int i = 0;
+      }
+    });
   }
 
 
