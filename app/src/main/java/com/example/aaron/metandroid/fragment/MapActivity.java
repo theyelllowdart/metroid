@@ -59,7 +59,7 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
   private MyPlayer myPlayer;
   private PhotoViewAttacher largeMapPhotoView;
   private ListView galleriesView;
-  private TextView galleryHeader;
+//  private TextView galleryHeader;
   private LargeMapView largeMapView;
   private Matrix originalMapMatrix;
   private LinearLayout galleryDetail;
@@ -147,14 +147,14 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
 
 
 //    galleriesView = (ListView) findViewById(R.id.listView);
-    addStopView = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.add_stop, null);
-    addStopView.setVisibility(View.GONE);
+//    addStopView = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.add_stop, null);
+//    addStopView.setVisibility(View.GONE);
 //    galleriesView.setFooterDividersEnabled(false);
 //    galleriesView.addFooterView(addStopView);
 //    galleryAdapter = new GalleryAdapter(this, android.R.layout.simple_list_item_1);
 //    galleriesView.setAdapter(galleryAdapter);
 
-    galleryHeader = (TextView) findViewById(R.id.galleryHeader);
+//    galleryHeader = (TextView) findViewById(R.id.galleryHeader);
 
     largeMapPhotoView.setOnViewTapListener(new OnMapTap());
 
@@ -171,20 +171,13 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
         .beginTransaction()
         .replace(R.id.fragment_container, ObjectListFragment.create(0, null))
         .commit();
-
-    mainActivity.getFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
-      @Override
-      public void onBackStackChanged() {
-        int i = 0;
-      }
-    });
   }
 
 
   private class OnMapTap implements PhotoViewAttacher.OnViewTapListener {
     @Override
     public void onViewTap(View view, float v, float v1) {
-      addStopView.setVisibility(View.VISIBLE);
+//      addStopView.setVisibility(View.VISIBLE);
       if (largeMapView.getPinToPlace() != null) {
         return;
       }
@@ -359,78 +352,78 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
           largeMapPhotoView.setDisplayMatrix(newMatrix);
 
 
-          addStopView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              PointF pinLocation = largeMapView.getPinLocation();
-              Matrix matrix = new Matrix();
-              largeMapPhotoView.getDisplayMatrix().invert(matrix);
-              float[] coordinates = new float[]{pinLocation.x, pinLocation.y};
-              matrix.mapPoints(coordinates);
-              float x = coordinates[0];
-              float y = coordinates[1];
-              final ArrayList<ArtObjectLocation> originalLocations = largeMapView.getLocations();
-              ArrayList<ArtObjectLocation> newLocations = new ArrayList<>(originalLocations);
-              newLocations.add(new ArtObjectLocation("temp", 0, x, y));
-              largeMapView.setPins(newLocations);
-
-              largeMapView.setPinToPlace(0);
-              galleryDetail.setVisibility(View.GONE);
-              missingStopButtons.setVisibility(View.VISIBLE);
-              missingStopAcceptButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                  String androidId = Settings.Secure.getString(getApplicationContext().getContentResolver(),
-                      Settings.Secure.ANDROID_ID);
-                  try {
-                    PointF pinLocation = largeMapView.getPinLocation();
-                    Matrix matrix = new Matrix();
-                    largeMapPhotoView.getDisplayMatrix().invert(matrix);
-                    float[] coordinates = new float[]{pinLocation.x, pinLocation.y};
-                    matrix.mapPoints(coordinates);
-
-                    float x = coordinates[0] / density;
-                    float y = coordinates[1] / density;
-
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put("stop", missingStopNumberButton.getText());
-                    jsonObject.put("gallery", gallery);
-                    jsonObject.put("x", x);
-                    jsonObject.put("y", y);
-                    jsonObject.put("user", androidId);
-                    jsonObject.put("created", System.currentTimeMillis());
-                    JsonObjectRequest request = new JsonObjectRequest(
-                        Request.Method.POST,
-                        "https://glacial-everglades-23026.herokuapp.com/missing-stop",
-                        jsonObject,
-                        new Response.Listener<JSONObject>() {
-                          @Override
-                          public void onResponse(JSONObject response) {
-
-                          }
-                        },
-                        new Response.ErrorListener() {
-                          @Override
-                          public void onErrorResponse(VolleyError error) {
-
-                          }
-                        }
-                    );
-                    queue.add(request);
-                  } catch (JSONException e) {
-                    Log.e("upload-missing-stop", e.getMessage(), e);
-                  }
-                  InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                  imm.hideSoftInputFromWindow(missingStopNumberButton.getWindowToken(), 0);
-
-                  galleryDetail.setVisibility(View.VISIBLE);
-                  missingStopButtons.setVisibility(View.GONE);
-                  largeMapView.setPins(originalLocations);
-                  largeMapView.clearPinToPlace();
-                }
-              });
-            }
-          });
+//          addStopView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//              PointF pinLocation = largeMapView.getPinLocation();
+//              Matrix matrix = new Matrix();
+//              largeMapPhotoView.getDisplayMatrix().invert(matrix);
+//              float[] coordinates = new float[]{pinLocation.x, pinLocation.y};
+//              matrix.mapPoints(coordinates);
+//              float x = coordinates[0];
+//              float y = coordinates[1];
+//              final ArrayList<ArtObjectLocation> originalLocations = largeMapView.getLocations();
+//              ArrayList<ArtObjectLocation> newLocations = new ArrayList<>(originalLocations);
+//              newLocations.add(new ArtObjectLocation("temp", 0, x, y));
+//              largeMapView.setPins(newLocations);
+//
+//              largeMapView.setPinToPlace(0);
+//              galleryDetail.setVisibility(View.GONE);
+//              missingStopButtons.setVisibility(View.VISIBLE);
+//              missingStopAcceptButton.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                  String androidId = Settings.Secure.getString(getApplicationContext().getContentResolver(),
+//                      Settings.Secure.ANDROID_ID);
+//                  try {
+//                    PointF pinLocation = largeMapView.getPinLocation();
+//                    Matrix matrix = new Matrix();
+//                    largeMapPhotoView.getDisplayMatrix().invert(matrix);
+//                    float[] coordinates = new float[]{pinLocation.x, pinLocation.y};
+//                    matrix.mapPoints(coordinates);
+//
+//                    float x = coordinates[0] / density;
+//                    float y = coordinates[1] / density;
+//
+//                    JSONObject jsonObject = new JSONObject();
+//                    jsonObject.put("stop", missingStopNumberButton.getText());
+//                    jsonObject.put("gallery", gallery);
+//                    jsonObject.put("x", x);
+//                    jsonObject.put("y", y);
+//                    jsonObject.put("user", androidId);
+//                    jsonObject.put("created", System.currentTimeMillis());
+//                    JsonObjectRequest request = new JsonObjectRequest(
+//                        Request.Method.POST,
+//                        "https://glacial-everglades-23026.herokuapp.com/missing-stop",
+//                        jsonObject,
+//                        new Response.Listener<JSONObject>() {
+//                          @Override
+//                          public void onResponse(JSONObject response) {
+//
+//                          }
+//                        },
+//                        new Response.ErrorListener() {
+//                          @Override
+//                          public void onErrorResponse(VolleyError error) {
+//
+//                          }
+//                        }
+//                    );
+//                    queue.add(request);
+//                  } catch (JSONException e) {
+//                    Log.e("upload-missing-stop", e.getMessage(), e);
+//                  }
+//                  InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+//                  imm.hideSoftInputFromWindow(missingStopNumberButton.getWindowToken(), 0);
+//
+//                  galleryDetail.setVisibility(View.VISIBLE);
+//                  missingStopButtons.setVisibility(View.GONE);
+//                  largeMapView.setPins(originalLocations);
+//                  largeMapView.clearPinToPlace();
+//                }
+//              });
+//            }
+//          });
         }
       }
     }

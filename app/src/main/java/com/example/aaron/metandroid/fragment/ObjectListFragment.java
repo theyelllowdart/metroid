@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -31,6 +32,12 @@ public class ObjectListFragment extends ListFragment {
   private OnObjectSelectListener selectCallback;
   private float density;
 
+
+  @Override
+  public void onListItemClick(ListView l, View v, int position, long id) {
+    super.onListItemClick(l, v, position, id);
+  }
+
   @Override
   public void onAttach(Activity activity) {
     super.onAttach(activity);
@@ -44,15 +51,26 @@ public class ObjectListFragment extends ListFragment {
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     density = getResources().getDisplayMetrics().density;
-    View a = inflater.inflate(R.layout.object_list, container, false);
+    View view = inflater.inflate(R.layout.object_list, container, false);
 
-    ((TextView) a.findViewById(R.id.galleryHeader)).setText(String.valueOf(getArguments().getInt("galleryId")));
+//    ((TextView) a.findViewById(R.id.galleryHeader)).setText(String.valueOf(getArguments().getInt("galleryId")));
 
 //    addStopView = (LinearLayout) LayoutInflater.from(this).inflate(R.layout.add_stop, null);
 //    addStopView.setVisibility(View.GONE);
 
 //    galleriesView.setFooterDividersEnabled(false);
 //    galleriesView.addFooterView(addStopView);
+
+    ListView listView = (ListView) view.findViewById(android.R.id.list);
+    View header = inflater.inflate(R.layout.gallery_header, listView, false);
+    if (getArguments().containsKey("galleryId")) {
+      String galleryId = String.valueOf(getArguments().getInt("galleryId"));
+      ((TextView) header.findViewById(R.id.galleryListHeader)).setText(galleryId);
+    }
+    listView.addHeaderView(header, null, false);
+    View footer = inflater.inflate(R.layout.gallery_footer, listView, false);
+    listView.addFooterView(footer, null, true);
+
 
     GalleryAdapter galleryAdapter = new GalleryAdapter(this.getActivity().getApplicationContext(), android.R.layout.simple_list_item_1);
     setListAdapter(galleryAdapter);
@@ -62,8 +80,7 @@ public class ObjectListFragment extends ListFragment {
       galleryAdapter.addAll(rows);
     }
 
-
-    return a;
+    return view;
   }
 
   static ObjectListFragment create(int galleryId, ArrayList<ArtObjectRow> rows) {
@@ -104,10 +121,8 @@ public class ObjectListFragment extends ListFragment {
       }
     }
 
-    @Override
-    public boolean isEnabled(int position) {
-      return false;
-    }
+
+
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
@@ -195,14 +210,7 @@ public class ObjectListFragment extends ListFragment {
         imageView.setOnClickListener(new View.OnClickListener() {
           @Override
           public void onClick(View v) {
-//            Toast.makeText(getContext(), "yo", Toast.LENGTH_LONG).show();
-//            mainActivity.getFragmentManager()
-//                .beginTransaction()
-//                .replace(R.id.fragment_container, ObjectDetailFragment.create(model.getTitle()))
-//                .addToBackStack("yo")
-//                .commit();
             selectCallback.onObjectSelected(model, position);
-
           }
         });
       }
