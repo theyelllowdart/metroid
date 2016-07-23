@@ -99,10 +99,10 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
   public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     // This database is only a cache for online data, so its upgrade policy is
     // to simply to discard the data and start over
-    db.execSQL("DROP TABLE IF EXISTS processed_stop");
-    db.execSQL("DROP TABLE IF EXISTS processed_media");
-    db.execSQL("DROP TABLE IF EXISTS object_location");
-    onCreate(db);
+//    db.execSQL("DROP TABLE IF EXISTS processed_stop");
+//    db.execSQL("DROP TABLE IF EXISTS processed_media");
+//    db.execSQL("DROP TABLE IF EXISTS object_location");
+//    onCreate(db);
   }
 
   public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {

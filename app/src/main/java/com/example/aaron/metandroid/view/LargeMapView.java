@@ -1,5 +1,6 @@
-package com.example.aaron.metandroid.fragment;
+package com.example.aaron.metandroid.view;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -10,8 +11,14 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.VectorDrawable;
+import android.support.v4.view.MotionEventCompat;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.example.aaron.metandroid.MyApplication;
@@ -43,11 +50,26 @@ public class LargeMapView extends ImageView {
   private ArrayList<Rect> pinBoundsList = new ArrayList<>();
   private ArrayList<ArtObjectLocation> locations = new ArrayList<>();
 
+  private ScaleGestureDetector mScaleDetector;
+  private GestureDetector gestureListener;
+  private float mScaleFactor = 1.f;
+  private float scaleFocusX = 0f;
+  private float scaleFocusY = 0f;
+
+  private float mPosX;
+  private float mPosY;
+
+  Matrix drawMatrix = new Matrix();
+  float lastFocusX;
+  float lastFocusY;
+
 
   public LargeMapView(Context context, AttributeSet attrs) throws IOException {
     super(context, attrs);
 
     density = getResources().getDisplayMetrics().density;
+    mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
+    gestureListener = new GestureDetector(context, new GestureListener());
 
     textPaint = new Paint();
     textPaint.setARGB(255, 88, 126, 146);
@@ -151,19 +173,106 @@ public class LargeMapView extends ImageView {
     return null;
   }
 
+
+  private float mLastTouchX;
+  private float mLastTouchY;
+
+  private int INVALID_POINTER_ID = Integer.MIN_VALUE;
+  private int mActivePointerId = INVALID_POINTER_ID;
+
+//  @Override
+//  public boolean onTouchEvent(MotionEvent ev) {
+//    super.onTouchEvent(ev);
+//    boolean wasScaled = mScaleDetector.onTouchEvent(ev);
+//
+//    final int action = MotionEventCompat.getActionMasked(ev);
+//
+//    boolean isScaling = mScaleDetector.isInProgress();
+//    if  (isScaling) {
+//      switch (action) {
+//        case MotionEvent.ACTION_DOWN: {
+//          final int pointerIndex = MotionEventCompat.getActionIndex(ev);
+//          final float x = MotionEventCompat.getX(ev, pointerIndex);
+//          final float y = MotionEventCompat.getY(ev, pointerIndex);
+//
+//          // Remember where we started (for dragging)
+//          mLastTouchX = x;
+//          mLastTouchY = y;
+//          // Save the ID of this pointer (for dragging)
+//          mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
+//          break;
+//        }
+//
+//        case MotionEvent.ACTION_MOVE: {
+//          // Find the index of the active pointer and fetch its position
+//          final int pointerIndex =
+//              MotionEventCompat.findPointerIndex(ev, mActivePointerId);
+//
+//          final float x = MotionEventCompat.getX(ev, pointerIndex);
+//          final float y = MotionEventCompat.getY(ev, pointerIndex);
+//
+//          // Calculate the distance moved
+//          final float dx = x - mLastTouchX;
+//          final float dy = y - mLastTouchY;
+//
+//          mPosX += dx * (1 / mScaleFactor) * 2;
+//          mPosY += dy * (1 / mScaleFactor) * 2;
+//
+//          invalidate();
+//
+//          // Remember this touch position for the next move event
+//          mLastTouchX = x;
+//          mLastTouchY = y;
+//
+//          break;
+//        }
+//
+//        case MotionEvent.ACTION_UP: {
+//          mActivePointerId = INVALID_POINTER_ID;
+//          break;
+//        }
+//
+//        case MotionEvent.ACTION_CANCEL: {
+//          mActivePointerId = INVALID_POINTER_ID;
+//          break;
+//        }
+//
+//        case MotionEvent.ACTION_POINTER_UP: {
+//
+//          final int pointerIndex = MotionEventCompat.getActionIndex(ev);
+//          final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
+//
+//          if (pointerId == mActivePointerId) {
+//            // This was our active pointer going up. Choose a new
+//            // active pointer and adjust accordingly.
+//            final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
+//            mLastTouchX = MotionEventCompat.getX(ev, newPointerIndex);
+//            mLastTouchY = MotionEventCompat.getY(ev, newPointerIndex);
+//            mActivePointerId = MotionEventCompat.getPointerId(ev, newPointerIndex);
+//          }
+//          break;
+//        }
+//      }
+//    }
+//    return true;
+//  }
+
+
   @Override
   public void onDraw(Canvas canvas) {
+    setImageMatrix(drawMatrix);
+
     super.onDraw(canvas);
 
 
-    getImageMatrix().getValues(imageMatrixValues);
+    drawMatrix.getValues(imageMatrixValues);
     textPaint.setTextSize(8 * density * imageMatrixValues[Matrix.MSCALE_X]);
 
-    verticalTextMatrix.set(getImageMatrix());
+    verticalTextMatrix.set(drawMatrix);
     verticalTextMatrix.postTranslate(imageMatrixValues[Matrix.MSCALE_X] * 10, 0);
     verticalTextMatrix.postRotate(90);
 
-    horizontalTextMatrix.set(getImageMatrix());
+    horizontalTextMatrix.set(drawMatrix);
     horizontalTextMatrix.postTranslate(0, imageMatrixValues[Matrix.MSCALE_X] * 10);
 
     canvas.getClipBounds(clipBounds);
@@ -174,10 +283,10 @@ public class LargeMapView extends ImageView {
       final GalleryLabel label = paintGallery.getLabel();
 
       final RectF scaled = rect.getScaled();
-      getImageMatrix().mapRect(galleryBoundsDest, scaled);
+      drawMatrix.mapRect(galleryBoundsDest, scaled);
 
       if (RectF.intersects(galleryBoundsDest, clipBoundsF)) {
-//        canvas.drawRect(galleryBoundsDest, paint);
+        canvas.drawRect(galleryBoundsDest, paint);
 
         if (label.isHorizontal()) {
           horizontalTextMatrix.mapPoints(galleryTextDest, label.getCoord());
@@ -203,7 +312,7 @@ public class LargeMapView extends ImageView {
 
 
       Path transformedPath = new Path();
-      path.transform(getImageMatrix(), transformedPath);
+      path.transform(drawMatrix, transformedPath);
       //canvas.drawPath(transformedPath, paints.get(0));
     }
 
@@ -231,7 +340,7 @@ public class LargeMapView extends ImageView {
       } else {
         halfPinSize = 5 * density;
         pinBounds.set(pin.getRect());
-        getImageMatrix().mapRect(pinBounds);
+        drawMatrix.mapRect(pinBounds);
       }
       pinBounds.round(finalPinBounds);
       pinDrawable.setBounds(finalPinBounds);
@@ -365,5 +474,70 @@ public class LargeMapView extends ImageView {
     }
   }
 
+
+  // Borrowed from
+  // http://stackoverflow.com/questions/19418878/implementing-pinch-zoom-and-drag-using-androids-build-in-gesture-listener-and-s
+  private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+
+    @Override
+    public boolean onScaleBegin(ScaleGestureDetector detector) {
+      lastFocusX = detector.getFocusX();
+      lastFocusY = detector.getFocusY();
+      return true;
+    }
+
+    @Override
+    public boolean onScale(ScaleGestureDetector detector) {
+      Matrix transformationMatrix = new Matrix();
+      float focusX = detector.getFocusX();
+      float focusY = detector.getFocusY();
+
+      //Zoom focus is where the fingers are centered,
+      transformationMatrix.postTranslate(-focusX, -focusY);
+
+      transformationMatrix.postScale(detector.getScaleFactor(), detector.getScaleFactor());
+
+/* Adding focus shift to allow for scrolling with two pointers down. Remove it to skip this functionality. This could be done in fewer lines, but for clarity I do it this way here */
+      //Edited after comment by chochim
+      float focusShiftX = focusX - lastFocusX;
+      float focusShiftY = focusY - lastFocusY;
+      transformationMatrix.postTranslate((focusX + focusShiftX), focusY + focusShiftY);
+      drawMatrix.postConcat(transformationMatrix);
+      lastFocusX = focusX;
+      lastFocusY = focusY;
+      invalidate();
+      return true;
+    }
+
+  }
+
+  public class GestureListener extends GestureDetector.SimpleOnGestureListener {
+    @Override
+    public boolean onScroll(MotionEvent downEvent, MotionEvent currentEvent,
+                            float distanceX, float distanceY) {
+      drawMatrix.postTranslate(-distanceX * 1.5f, -distanceY * 1.5f);
+      invalidate();
+      return true;
+    }
+
+    @Override
+    public boolean onSingleTapConfirmed(MotionEvent e) {
+      Log.i("onSingleTap :", "" + e.getX() + "," + e.getY());
+      return true;
+    }
+
+    @Override
+    public boolean onDoubleTap(MotionEvent e) {
+      Log.i("doubleSingleTap :", "" + e.getX() + "," + e.getY());
+      return true;
+    }
+  }
+
+  @Override
+  public boolean onTouchEvent(MotionEvent event) {
+    mScaleDetector.onTouchEvent(event);
+    gestureListener.onTouchEvent(event);
+    return true;
+  }
 }
 

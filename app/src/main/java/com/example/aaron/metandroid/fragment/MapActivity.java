@@ -1,19 +1,14 @@
 package com.example.aaron.metandroid.fragment;
 
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -22,11 +17,7 @@ import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.aaron.metandroid.MyApplication;
 import com.example.aaron.metandroid.R;
@@ -37,11 +28,9 @@ import com.example.aaron.metandroid.util.FeedReaderDbHelper;
 import com.example.aaron.metandroid.model.GalleryViewRect;
 import com.example.aaron.metandroid.model.QueryModel;
 import com.example.aaron.metandroid.model.StopModel;
+import com.example.aaron.metandroid.view.LargeMapView;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,7 +42,9 @@ import java.util.List;
 import uk.co.senab.photoview.PhotoViewAttacher;
 
 
-public class MapActivity extends Activity implements ObjectListFragment.OnObjectSelectListener, ObjectDetailFragment.OnMediaSelectListener, ObjectDetailFragment.OnMoveSelectListener, ObjectMoveFragment.OnExitMoveModeListener {
+public class MapActivity extends Activity implements ObjectListFragment.OnObjectSelectListener,
+    ObjectDetailFragment.OnMediaSelectListener, ObjectDetailFragment.OnMoveSelectListener,
+    ObjectMoveFragment.OnExitMoveModeListener, MapFragment.OnPinSelectListener, MapFragment.OnMapSelectListener {
 
   private Float density;
   private MyPlayer myPlayer;
@@ -115,6 +106,187 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
     largeMapView.clearPinToPlace();
   }
 
+  @Override
+  public void onPinSelected(StopModel model, int pinNumber) {
+    Object fragment = mainActivity
+        .getFragmentManager()
+        .findFragmentById(R.id.fragment_container);
+    if (fragment instanceof ObjectListFragment) {
+      ((ObjectListFragment) fragment).setSelection(pinNumber);
+    } else if (fragment instanceof ObjectDetailFragment) {
+      ((ObjectDetailFragment) fragment).setSelection(pinNumber);
+    }
+  }
+
+  @Override
+  public void onMapSelected(float x, float y) {
+    if (largeMapView.getPinToPlace() != null) {
+      return;
+    }
+
+    Matrix matrix = new Matrix();
+    largeMapPhotoView.getDisplayMatrix().invert(matrix);
+    float[] coordinates = new float[]{x, y};
+    matrix.mapPoints(coordinates);
+    Log.i("tag", coordinates[0] / density + " " + coordinates[1] / density);
+
+
+    for (GalleryViewRect rect : MyApplication.galleryRectById.values()) {
+      if (rect.contains(coordinates[0], coordinates[1])) {
+        final int gallery = rect.getId();
+        SQLiteDatabase db = new FeedReaderDbHelper(getApplicationContext()).getReadableDatabase();
+        try (Cursor c = db.rawQuery(
+            "SELECT s.objectId, s.title as objectTitle, image, m.title as audioTitle, m.uri as audio, s.id as stop, m.position, width, height " +
+                "FROM processed_stop s " +
+                "LEFT OUTER JOIN processed_media m ON (s.id = m.stop) " +
+                "WHERE gallery = " + rect.getId() + " " +
+                "ORDER BY m.stop, m.position ", null)
+        ) {
+          HashMap<String, ArrayList<QueryModel>> modelsByObjectId = new HashMap<>();
+          HashMap<String, ArrayList<QueryModel>> modelsByTitle = new HashMap<>();
+          while ((c.moveToNext())) {
+            String objectId = c.getString(c.getColumnIndexOrThrow("objectId"));
+            String title = c.getString(c.getColumnIndexOrThrow("objectTitle"));
+            String image = c.getString(c.getColumnIndexOrThrow("image"));
+            int stop = c.getInt(c.getColumnIndex("stop"));
+
+            String audioTitle = c.getString(c.getColumnIndex("audioTitle"));
+            String audio = null;
+            if (audioTitle == null) {
+              audioTitle = "Broken link";
+              audio = "broken";
+            } else {
+              audio = c.getString(c.getColumnIndex("audio"));
+            }
+            audioTitle = audioTitle + '-' + stop;
+
+            int position = c.getInt(c.getColumnIndex("position"));
+            int width = c.getInt(c.getColumnIndex("width"));
+            int height = c.getInt(c.getColumnIndex("height"));
+            QueryModel model = new QueryModel(title, image, audioTitle, audio, stop, position, objectId, width, height);
+            if (objectId.startsWith("s") && !modelsByTitle.containsKey(title)) {
+              modelsByTitle.put(title, new ArrayList<QueryModel>());
+            }
+            if (!objectId.startsWith("s") && !modelsByObjectId.containsKey(objectId)) {
+              modelsByObjectId.put(objectId, new ArrayList<QueryModel>());
+            }
+            ArrayList<QueryModel> models;
+            if (objectId.startsWith("s")) {
+              models = modelsByTitle.get(title);
+            } else {
+              models = modelsByObjectId.get(objectId);
+            }
+            boolean hasAudio = false;
+            for (QueryModel q : models) {
+              if (q.getMediaURL().equals(audio)) {
+                hasAudio = true;
+              }
+            }
+            if (!hasAudio)
+              models.add(model);
+
+          }
+          ArrayList<StopModel> stopModels = new ArrayList<>();
+          for (ArrayList<QueryModel> qs : Iterables.concat(modelsByObjectId.values(), modelsByTitle.values())) {
+            StopModel stopModel = new StopModel(qs.get(0).getArtObjectId(), rect.getId(), qs.get(0).getWidth(), qs.get(0).getHeight(), qs.get(0).getTitle(), qs.get(0).getImageURL());
+            for (QueryModel q : qs) {
+              stopModel.addMedia(new MediaModel(q.getMediaTitle(), q.getMediaURL(), q.getStopId()));
+            }
+            stopModels.add(stopModel);
+          }
+          Collections.sort(stopModels);
+
+          ArrayList<ArtObjectRow> rows = new ArrayList<>();
+          for (int i = 0; i < stopModels.size(); i++) {
+            StopModel stopModel1 = stopModels.get(i);
+            StopModel stopModel2 = null;
+            int height = stopModel1.getHeight();
+            int width = stopModel1.getWidth();
+            double ratio = width / (double) height;
+            if (ratio <= 1.3) {
+              int nextPortrait = -1;
+              for (int j = i + 1; j < stopModels.size(); j++) {
+                StopModel stopModel = stopModels.get(j);
+                if ((stopModel.getWidth() / (double) stopModel.getHeight()) <= 1.3) {
+                  nextPortrait = j;
+                  break;
+                }
+              }
+              if (nextPortrait != -1) {
+                Collections.swap(stopModels, i + 1, nextPortrait);
+                stopModel2 = stopModels.get(i + 1);
+                i++;
+              }
+            }
+            rows.add(new ArtObjectRow(stopModel1, stopModel2));
+          }
+
+          mainActivity.getFragmentManager()
+              .beginTransaction()
+              .replace(R.id.fragment_container, ObjectListFragment.create(gallery, rows))
+              .commit();
+
+//            Collections.sort(stopModels);
+//            galleryAdapter.addAll(rows);
+//            galleriesView.setSelection(0);
+
+
+          // Find pin Locations
+          HashSet<String> artObjectIds = new HashSet<>();
+          for (StopModel s : stopModels) {
+            artObjectIds.add("'" + s.getArtObjectId() + "'");
+          }
+          if (!artObjectIds.isEmpty()) {
+            try (Cursor cl = db.rawQuery(
+                "SELECT objectId, x, y " +
+                    "FROM object_location " +
+                    "WHERE objectId in (" + Joiner.on(',').join(artObjectIds) + ") ", null)
+            ) {
+              HashMap<String, PointF> artObjectIdToPoint = new HashMap<>();
+              while ((cl.moveToNext())) {
+                String objectId = cl.getString(cl.getColumnIndexOrThrow("objectId"));
+                float x1 = cl.getFloat(cl.getColumnIndexOrThrow("x"));
+                float y1 = cl.getFloat(cl.getColumnIndexOrThrow("y"));
+                artObjectIdToPoint.put(objectId, new PointF(x1 * density, y1 * density));
+              }
+              int unsetLocationCount = 0;
+              ArrayList<ArtObjectLocation> pins = new ArrayList<>();
+              for (int i = 0; i < stopModels.size(); i++) {
+                StopModel s = stopModels.get(i);
+                PointF point = artObjectIdToPoint.get(s.getArtObjectId());
+                if (point == null) {
+                  point = new PointF(rect.getScaled().centerX() + 5 * density * unsetLocationCount, rect.getScaled().centerY());
+                  unsetLocationCount++;
+                }
+                pins.add(new ArtObjectLocation(s.getArtObjectId(), i + 1, point.x, point.y));
+              }
+              largeMapView.setPins(pins);
+            }
+          }
+        }
+
+        // Zoom to gallery on large map
+        RectF imageBounds = new RectF(0, 0, largeMapPhotoView.getImageView().getWidth(), largeMapPhotoView.getImageView().getHeight());
+        Matrix newMatrix = new Matrix();
+        RectF galleryRect = rect.getScaled();
+        float minSize = 100 * density;
+        float sizeX = Math.max(minSize, galleryRect.width());
+        float sizeY = Math.max(minSize, galleryRect.height());
+        RectF newViewPort = new RectF(
+            (galleryRect.centerX() - sizeX / 2),
+            (galleryRect.centerY() - sizeY / 2),
+            (galleryRect.centerX() + sizeX / 2),
+            (galleryRect.centerY() + sizeY / 2)
+        );
+        newMatrix.setRectToRect(newViewPort, imageBounds, Matrix.ScaleToFit.CENTER);
+        Matrix originalInvertedMatrix = new Matrix();
+        originalMapMatrix.invert(originalInvertedMatrix);
+        newMatrix.preConcat(originalInvertedMatrix);
+        largeMapPhotoView.setDisplayMatrix(newMatrix);
+      }
+    }
+  }
+
   private class MyPhotoViewAttacher extends PhotoViewAttacher {
 
     public MyPhotoViewAttacher(ImageView imageView) {
@@ -147,10 +319,10 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
         (TextView) findViewById(R.id.audioTitle)
     );
 
-    largeMapView = (LargeMapView) findViewById(R.id.largeMap);
-    largeMapPhotoView = new MyPhotoViewAttacher(largeMapView);
-    largeMapPhotoView.setMaximumScale(20f);
-    largeMapPhotoView.setMediumScale(5f);
+//    largeMapView = (LargeMapView) findViewById(R.id.largeMap);
+//    largeMapPhotoView = new MyPhotoViewAttacher(largeMapView);
+//    largeMapPhotoView.setMaximumScale(20f);
+//    largeMapPhotoView.setMediumScale(5f);
 
 
 //    galleriesView = (ListView) findViewById(R.id.listView);
@@ -163,7 +335,7 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
 
 //    galleryHeader = (TextView) findViewById(R.id.galleryHeader);
 
-    largeMapPhotoView.setOnViewTapListener(new OnMapTap());
+//    largeMapPhotoView.setOnViewTapListener(new OnMapTap());
 
     galleryDetail = null;
     moveButtons = (LinearLayout) findViewById(R.id.moveButtons);
@@ -196,7 +368,14 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
 
       Integer pinPosition = largeMapView.getPin(coordinates[0], coordinates[1]);
       if (pinPosition != null) {
-        galleriesView.setSelection(pinPosition);
+        Object fragment = mainActivity
+            .getFragmentManager()
+            .findFragmentById(R.id.fragment_container);
+        if (fragment instanceof ObjectListFragment) {
+          ((ObjectListFragment) fragment).setSelection(pinPosition);
+        } else if (fragment instanceof ObjectDetailFragment) {
+          ((ObjectListFragment) fragment).setSelection(pinPosition);
+        }
         return;
       }
 
