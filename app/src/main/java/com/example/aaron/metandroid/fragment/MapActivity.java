@@ -269,6 +269,7 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
               }
               stopModels.add(stopModel);
             }
+            Collections.sort(stopModels);
 
             ArrayList<ArtObjectRow> rows = new ArrayList<>();
             for (int i = 0; i < stopModels.size(); i++) {
