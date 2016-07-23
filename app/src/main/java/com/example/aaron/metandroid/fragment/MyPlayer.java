@@ -1,9 +1,9 @@
 package com.example.aaron.metandroid.fragment;
 
-import android.annotation.SuppressLint;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.view.View;
 import android.widget.Button;
@@ -15,22 +15,18 @@ import com.example.aaron.metandroid.model.MediaModel;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MyPlayer {
   final private static int PROGRESS_UPDATE_MS = 100;
-  final private Object playStateLock = new Object();
 
   final private SeekBar seekBar;
   final private Button playButton;
   final private TextView timeView;
   final private TextView titleView;
 
-  private MediaPlayer mediaPlayer;
-  private Boolean isPrepared = false;
+  private MediaPlayer masterMediaPlayer;
   private Boolean isSeekBarDragging = false;
-  private Boolean isFinished = false;
-
-  private ArrayList<MediaModel> queue = new ArrayList<>();
 
   public MyPlayer(SeekBar seekBar, Button playButton, final TextView timeView, TextView titleView) {
     this.seekBar = seekBar;
@@ -38,152 +34,141 @@ public class MyPlayer {
     this.timeView = timeView;
     this.titleView = titleView;
 
-
-    this.playButton.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        if (isFinished) {
-          if (queue.size() > 0) {
-            ArrayList<MediaModel> newQueue = new ArrayList<MediaModel>(queue);
-            MediaModel media = newQueue.remove(0);
-            try {
-              play(media.getUri(), media.getTitle(), newQueue);
-            } catch (IOException e) {
-              throw new RuntimeException(e);
-            }
-          } else {
-            start();
-          }
-        } else if (isPrepared) {
-          if (mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
-            progressHandler.removeCallbacks(updateProgress);
-          } else {
-            start();
-          }
-        }
-      }
-    });
-    this.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-      @Override
-      public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        if (isPrepared) {
-          int progressMinutes = progress / 60000;
-          int progressSeconds = progress % 60000 / 1000;
-
-          //Set this once in the beginning
-          int durationMinutes = mediaPlayer.getDuration() / 60000;
-          int durationSeconds = mediaPlayer.getDuration() % 60000 / 1000;
-
-          String formatted = String.format("%02d:%02d/%02d:%02d",
-              progressMinutes, progressSeconds, durationMinutes, durationSeconds);
-          timeView.setText(formatted);
-        } else {
-          seekBar.setProgress(0);
-        }
-      }
-
-      @Override
-      public void onStartTrackingTouch(SeekBar seekBar) {
-        isSeekBarDragging = true;
-      }
-
-      @Override
-      public void onStopTrackingTouch(SeekBar seekBar) {
-        if (isPrepared) {
-          mediaPlayer.seekTo(seekBar.getProgress());
-        }
-        isSeekBarDragging = false;
-      }
-    });
-
+    this.playButton.setEnabled(false);
+    this.seekBar.setEnabled(false);
   }
 
-  public void play(String uri, String title, List<MediaModel> queue) throws IOException {
-    release();
-
-    this.queue.clear();
-    this.queue.addAll(queue);
+  public void play(String uri, String title, final List<MediaModel> queue) throws IOException {
+    progressHandler.removeCallbacks(null);
+    this.playButton.setEnabled(false);
+    this.playButton.setOnClickListener(null);
+    this.seekBar.setEnabled(false);
+    this.seekBar.setOnSeekBarChangeListener(null);
+    timeView.setText("00:00/00:00");
+    seekBar.setMax(100);
+    seekBar.setProgress(0);
+    seekBar.setSecondaryProgress(0);
+    if (masterMediaPlayer != null) {
+      masterMediaPlayer.reset();
+      masterMediaPlayer.release();
+    }
 
     this.titleView.setText(title);
 
-    mediaPlayer = new MediaPlayer();
-    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-    mediaPlayer.setDataSource(uri);
-    mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+    masterMediaPlayer = new MediaPlayer();
+    masterMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+    masterMediaPlayer.setDataSource(uri);
+    masterMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
       @Override
-      public void onPrepared(MediaPlayer mp) {
-        synchronized (playStateLock) {
-          if (mediaPlayer != null) {
-            isPrepared = true;
-            seekBar.setMax(mp.getDuration());
-            start();
-          }
+      public void onPrepared(MediaPlayer mediaPlayer) {
+        if (masterMediaPlayer == mediaPlayer) {
+          seekBar.setMax(mediaPlayer.getDuration());
+          playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              if (masterMediaPlayer.isPlaying()) {
+                masterMediaPlayer.pause();
+                progressHandler.removeCallbacksAndMessages(null);
+              } else {
+                startPreparedPlayer();
+              }
+            }
+          });
+          seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+              int progressMinutes = (int) TimeUnit.MILLISECONDS.toMinutes(progress);
+              int progressSeconds =  (int) TimeUnit.MILLISECONDS.toSeconds(progress) % 60;
+
+              int durationMinutes = (int) TimeUnit.MILLISECONDS.toMinutes(seekBar.getMax());
+              int durationSeconds = (int) TimeUnit.MILLISECONDS.toSeconds(seekBar.getMax()) % 60;
+
+              String formatted = String.format("%02d:%02d/%02d:%02d",
+                  progressMinutes, progressSeconds, durationMinutes, durationSeconds);
+              timeView.setText(formatted);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+              isSeekBarDragging = true;
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+              masterMediaPlayer.seekTo(seekBar.getProgress());
+              isSeekBarDragging = false;
+            }
+          });
+          playButton.setEnabled(true);
+          seekBar.setEnabled(true);
+          startPreparedPlayer();
         }
       }
     });
-    mediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
+    masterMediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
       @Override
       public void onBufferingUpdate(MediaPlayer mp, int percent) {
-        seekBar.setSecondaryProgress(percent * mp.getDuration());
+        int secondaryProgress = Math.round((percent / 100.0f) * seekBar.getMax());
+        seekBar.setSecondaryProgress(secondaryProgress);
       }
     });
-    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+    masterMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
       @Override
       public void onCompletion(MediaPlayer mp) {
-        synchronized (playStateLock) {
-          if (mediaPlayer != null) {
-            progressHandler.removeCallbacks(updateProgress);
-          }
-          isFinished = true;
+        progressHandler.removeCallbacksAndMessages(null);
+        seekBar.setProgress(seekBar.getMax());
+        if (!queue.isEmpty()) {
+          playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              List<MediaModel> newQueue = new ArrayList<>(queue);
+              MediaModel media = newQueue.remove(0);
+              try {
+                play(media.getUri(), media.getTitle(), newQueue);
+              } catch (IOException e) {
+                throw new RuntimeException(e);
+              }
+            }
+          });
         }
       }
     });
-    mediaPlayer.prepareAsync();
+    masterMediaPlayer.prepareAsync();
   }
 
-  private void start() {
-    progressHandler.postDelayed(updateProgress, PROGRESS_UPDATE_MS);
-    mediaPlayer.start();
-
+  private void startPreparedPlayer() {
+    UpdateProgressRunnable r = new UpdateProgressRunnable(masterMediaPlayer, progressHandler);
+    masterMediaPlayer.start();
+    progressHandler.post(r);
   }
 
-  public void release() {
-    synchronized (playStateLock) {
-      if (mediaPlayer != null) {
-        mediaPlayer.reset();
-        mediaPlayer.release();
-        mediaPlayer = null;
-      }
-      isPrepared = false;
-      isFinished = false;
-      seekBar.setProgress(0);
-      seekBar.setSecondaryProgress(0);
-      progressHandler.removeCallbacks(updateProgress);
-    }
-  }
 
-  @SuppressLint("HandlerLeak")
-  final private Handler progressHandler = new Handler() {
+  final private Handler progressHandler = new Handler(Looper.getMainLooper()) {
     @Override
     public void handleMessage(Message msg) {
       super.handleMessage(msg);
-      if (!isSeekBarDragging) {
-        seekBar.setProgress(msg.what);
+      MediaPlayer targetPlayer = (MediaPlayer) msg.obj;
+      if (!isSeekBarDragging && targetPlayer == masterMediaPlayer) {
+        int newPosition = masterMediaPlayer.getCurrentPosition();
+        seekBar.setProgress(newPosition);
       }
     }
   };
 
-  final private Runnable updateProgress = new Runnable() {
-    public void run() {
-      synchronized (playStateLock) {
-        if (mediaPlayer != null) {
-          int position = mediaPlayer.getCurrentPosition();
-          progressHandler.obtainMessage(position).sendToTarget();
-          progressHandler.postDelayed(this, PROGRESS_UPDATE_MS);
-        }
-      }
+  private static class UpdateProgressRunnable implements Runnable {
+    final private MediaPlayer mediaPlayer;
+    final private Handler progressHandler;
+
+    private UpdateProgressRunnable(MediaPlayer mediaPlayer, Handler progressHandler) {
+      this.mediaPlayer = mediaPlayer;
+      this.progressHandler = progressHandler;
     }
-  };
+
+    @Override
+    public void run() {
+      progressHandler.obtainMessage(-1, mediaPlayer).sendToTarget();
+      progressHandler.postDelayed(this, PROGRESS_UPDATE_MS);
+    }
+  }
 
 }

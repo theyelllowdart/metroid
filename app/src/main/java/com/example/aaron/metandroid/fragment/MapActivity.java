@@ -87,7 +87,13 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
   public void onMediaSelected(List<MediaModel> models, int position) {
     MediaModel model = models.get(position);
     try {
-      myPlayer.play(model.getUri(), model.getTitle(), models);
+      List<MediaModel> queue;
+      if (position + 1 != models.size()) {
+        queue = models.subList(position + 1, models.size());
+      } else {
+        queue = new ArrayList<MediaModel>();
+      }
+      myPlayer.play(model.getUri(), model.getTitle(), queue);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
