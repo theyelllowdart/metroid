@@ -9,12 +9,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.aaron.metandroid.R;
 import com.example.aaron.metandroid.model.MediaModel;
 import com.example.aaron.metandroid.model.StopModel;
+import com.example.aaron.metandroid.util.CenterTopTranformation;
 
 import java.util.List;
 
@@ -34,13 +38,35 @@ public class ObjectDetailFragment extends ListFragment {
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    float density = getResources().getDisplayMetrics().density;
+
     View view = inflater.inflate(R.layout.detail_frag, container, false);
 
     model = getArguments().getParcelable("stopModel");
-    pinNumber =  getArguments().getInt("pinNumber");
+    pinNumber = getArguments().getInt("pinNumber");
 
+//    ((TextView) view.findViewById(R.id.detailPinNumber)).setText(String.valueOf(pinNumber));
     ((TextView) view.findViewById(R.id.detailText)).setText(model.getTitle());
     ((Button) view.findViewById(R.id.movePin)).setOnClickListener(new OnMoveObjectViewClickListener());
+
+
+//    ImageView imageView = (ImageView) view.findViewById(R.id.detailImage);
+//    int width = 200;
+//    if ((model.getWidth() / (double) model.getHeight()) > 1.3) {
+//      width = width * 2;
+//    }
+//    int height = 200;
+//    float imageScale = (width * density) / model.getWidth();
+//    imageView.getLayoutParams().width = Math.round(400 * density);
+//    imageView.getLayoutParams().height = Math.round(height * density);
+//
+//    Glide.with(getActivity().getBaseContext())
+//        .load(model.getImageURL())
+//        .diskCacheStrategy(DiskCacheStrategy.RESULT)
+////            .centerCrop()
+//        .transform(new CenterTopTranformation(getActivity().getBaseContext()))
+//        .override(Math.round(imageScale * model.getWidth()), Math.round(height * density))
+//        .into(imageView);
 
     MediaAdapter mediaAdapter = new MediaAdapter(
         this.getActivity().getApplicationContext(), android.R.layout.simple_list_item_1, model.getMedias());

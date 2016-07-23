@@ -7,7 +7,11 @@
   <TextView
     android:id="@+id/mediaTitle"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:layout_height="48dp"
+    android:textSize="16sp"
+    android:paddingTop="8dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
     android:textColor="#000"/>
 
 </LinearLayout>

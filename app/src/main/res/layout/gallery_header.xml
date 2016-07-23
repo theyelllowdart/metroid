@@ -2,12 +2,38 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
+              android:paddingTop="8dp"
+              android:paddingLeft="4dp"
+              android:paddingRight="8dp"
+              android:paddingBottom="8dp"
               android:orientation="vertical">
 
   <TextView
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:id="@+id/galleryListHeader"
+    android:layout_marginEnd="4dp"
+    android:layout_marginStart="4dp"
+    android:textStyle="bold"
+    android:textSize="18sp"
     android:text="Header"/>
+
+  <TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="4dp"
+    android:layout_marginStart="4dp"
+    android:textSize="16sp"
+    android:text="French Decorative Arts: Tessé Room"/>
+
+  <!--<TextView-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_marginEnd="4dp"-->
+    <!--android:layout_marginStart="4dp"-->
+    <!--android:maxLines="2"-->
+    <!--android:ellipsize="end"-->
+    <!--android:singleLine="false"-->
+    <!--android:text="Devoted to the decorative arts of seventeenth- and especially eighteenth-century France, The Wrightsman Galleries (522–529, 531–533, and 545–547) display the Museum's holdings of furniture, Savonnerie carpets, gilt bronze, Sèvres porcelain, silver, and gold boxes. Since the 1963 acquisition of the paneling from the Hôtel de Varengeville and the Palais Paar with funds given by Mr. and Mrs. Charles Wrightsman, these rooms have borne the Wrightsmans' name."/>-->
 
 </LinearLayout>

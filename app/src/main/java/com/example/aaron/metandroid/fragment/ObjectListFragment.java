@@ -25,6 +25,7 @@ import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
 import com.example.aaron.metandroid.R;
 import com.example.aaron.metandroid.model.ArtObjectRow;
 import com.example.aaron.metandroid.model.StopModel;
+import com.example.aaron.metandroid.util.CenterTopTranformation;
 
 import java.util.ArrayList;
 
@@ -65,7 +66,7 @@ public class ObjectListFragment extends ListFragment {
     View header = inflater.inflate(R.layout.gallery_header, listView, false);
     if (getArguments().containsKey("galleryId")) {
       String galleryId = String.valueOf(getArguments().getInt("galleryId"));
-      ((TextView) header.findViewById(R.id.galleryListHeader)).setText(galleryId);
+      ((TextView) header.findViewById(R.id.galleryListHeader)).setText("Gallery " + galleryId);
     }
     listView.addHeaderView(header, null, false);
     View footer = inflater.inflate(R.layout.gallery_footer, listView, false);
@@ -120,8 +121,6 @@ public class ObjectListFragment extends ListFragment {
         this.title2 = title2;
       }
     }
-
-
 
 
     @Override
@@ -215,66 +214,6 @@ public class ObjectListFragment extends ListFragment {
         });
       }
       return convertView;
-    }
-  }
-
-  private class CenterTopTranformation extends BitmapTransformation {
-
-    public CenterTopTranformation(Context context) {
-      super(context);
-    }
-
-
-    private Bitmap transform(Bitmap recycled, Bitmap toCrop, int width, int height) {
-      if (toCrop == null) {
-        return null;
-      } else if (toCrop.getWidth() == width && toCrop.getHeight() == height) {
-        return toCrop;
-      }
-      // From ImageView/Bitmap.createScaledBitmap.
-      final float scale;
-      float dx = 0;
-      Matrix m = new Matrix();
-      if (toCrop.getWidth() * height > width * toCrop.getHeight()) {
-        scale = (float) height / (float) toCrop.getHeight();
-        dx = (width - toCrop.getWidth() * scale) * 0.5f;
-      } else {
-        scale = (float) width / (float) toCrop.getWidth();
-      }
-
-      m.setScale(scale, scale);
-      m.postTranslate((int) (dx + 0.5f), 0);
-      final Bitmap result;
-      if (recycled != null) {
-        result = recycled;
-      } else {
-        result = Bitmap.createBitmap(width, height, toCrop.getConfig() != null ? toCrop.getConfig() : Bitmap.Config.ARGB_8888);
-      }
-
-      // We don't add or remove alpha, so keep the alpha setting of the Bitmap we were given.
-      TransformationUtils.setAlpha(toCrop, result);
-
-      Canvas canvas = new Canvas(result);
-      Paint paint = new Paint(TransformationUtils.PAINT_FLAGS);
-      canvas.drawBitmap(toCrop, m, paint);
-      return result;
-    }
-
-    @Override
-    protected Bitmap transform(BitmapPool pool, Bitmap toTransform, int outWidth, int outHeight) {
-      final Bitmap toReuse = pool.get(outWidth, outHeight, toTransform.getConfig() != null
-          ? toTransform.getConfig() : Bitmap.Config.ARGB_8888);
-
-      Bitmap transformed = transform(toReuse, toTransform, outWidth, outHeight);
-      if (toReuse != null && toReuse != transformed && !pool.put(toReuse)) {
-        toReuse.recycle();
-      }
-      return transformed;
-    }
-
-    @Override
-    public String getId() {
-      return "yo";
     }
   }
 
