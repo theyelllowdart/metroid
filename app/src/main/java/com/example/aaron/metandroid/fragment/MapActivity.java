@@ -140,6 +140,7 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
     density = getResources().getDisplayMetrics().density;
 
     myPlayer = new MyPlayer(
+        getBaseContext(),
         (SeekBar) findViewById(R.id.seek),
         (Button) findViewById(R.id.play),
         (TextView) findViewById(R.id.time),

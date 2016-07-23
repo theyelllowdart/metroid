@@ -1,5 +1,6 @@
 package com.example.aaron.metandroid.fragment;
 
+import android.content.Context;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
@@ -9,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.aaron.metandroid.model.MediaModel;
 
@@ -20,6 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class MyPlayer {
   final private static int PROGRESS_UPDATE_MS = 100;
 
+  final private Context context;
   final private SeekBar seekBar;
   final private Button playButton;
   final private TextView timeView;
@@ -28,7 +31,8 @@ public class MyPlayer {
   private MediaPlayer masterMediaPlayer;
   private Boolean isSeekBarDragging = false;
 
-  public MyPlayer(SeekBar seekBar, Button playButton, final TextView timeView, TextView titleView) {
+  public MyPlayer(Context context, SeekBar seekBar, Button playButton, final TextView timeView, TextView titleView) {
+    this.context = context;
     this.seekBar = seekBar;
     this.playButton = playButton;
     this.timeView = timeView;
@@ -58,6 +62,15 @@ public class MyPlayer {
     masterMediaPlayer = new MediaPlayer();
     masterMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
     masterMediaPlayer.setDataSource(uri);
+    masterMediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+      @Override
+      public boolean onError(MediaPlayer mediaPlayer, int what, int extra) {
+        if (masterMediaPlayer == mediaPlayer) {
+          Toast.makeText(context, "Error playing audio", Toast.LENGTH_SHORT).show();
+        }
+        return true;
+      }
+    });
     masterMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
       @Override
       public void onPrepared(MediaPlayer mediaPlayer) {
