@@ -52,16 +52,7 @@ public class LargeMapView extends ImageView {
 
   private ScaleGestureDetector mScaleDetector;
   private GestureDetector gestureListener;
-  private float mScaleFactor = 1.f;
-  private float scaleFocusX = 0f;
-  private float scaleFocusY = 0f;
-
-  private float mPosX;
-  private float mPosY;
-
-  Matrix drawMatrix = new Matrix();
-  float lastFocusX;
-  float lastFocusY;
+  private Matrix drawMatrix = new Matrix();
 
 
   public LargeMapView(Context context, AttributeSet attrs) throws IOException {
@@ -173,91 +164,6 @@ public class LargeMapView extends ImageView {
     return null;
   }
 
-
-  private float mLastTouchX;
-  private float mLastTouchY;
-
-  private int INVALID_POINTER_ID = Integer.MIN_VALUE;
-  private int mActivePointerId = INVALID_POINTER_ID;
-
-//  @Override
-//  public boolean onTouchEvent(MotionEvent ev) {
-//    super.onTouchEvent(ev);
-//    boolean wasScaled = mScaleDetector.onTouchEvent(ev);
-//
-//    final int action = MotionEventCompat.getActionMasked(ev);
-//
-//    boolean isScaling = mScaleDetector.isInProgress();
-//    if  (isScaling) {
-//      switch (action) {
-//        case MotionEvent.ACTION_DOWN: {
-//          final int pointerIndex = MotionEventCompat.getActionIndex(ev);
-//          final float x = MotionEventCompat.getX(ev, pointerIndex);
-//          final float y = MotionEventCompat.getY(ev, pointerIndex);
-//
-//          // Remember where we started (for dragging)
-//          mLastTouchX = x;
-//          mLastTouchY = y;
-//          // Save the ID of this pointer (for dragging)
-//          mActivePointerId = MotionEventCompat.getPointerId(ev, 0);
-//          break;
-//        }
-//
-//        case MotionEvent.ACTION_MOVE: {
-//          // Find the index of the active pointer and fetch its position
-//          final int pointerIndex =
-//              MotionEventCompat.findPointerIndex(ev, mActivePointerId);
-//
-//          final float x = MotionEventCompat.getX(ev, pointerIndex);
-//          final float y = MotionEventCompat.getY(ev, pointerIndex);
-//
-//          // Calculate the distance moved
-//          final float dx = x - mLastTouchX;
-//          final float dy = y - mLastTouchY;
-//
-//          mPosX += dx * (1 / mScaleFactor) * 2;
-//          mPosY += dy * (1 / mScaleFactor) * 2;
-//
-//          invalidate();
-//
-//          // Remember this touch position for the next move event
-//          mLastTouchX = x;
-//          mLastTouchY = y;
-//
-//          break;
-//        }
-//
-//        case MotionEvent.ACTION_UP: {
-//          mActivePointerId = INVALID_POINTER_ID;
-//          break;
-//        }
-//
-//        case MotionEvent.ACTION_CANCEL: {
-//          mActivePointerId = INVALID_POINTER_ID;
-//          break;
-//        }
-//
-//        case MotionEvent.ACTION_POINTER_UP: {
-//
-//          final int pointerIndex = MotionEventCompat.getActionIndex(ev);
-//          final int pointerId = MotionEventCompat.getPointerId(ev, pointerIndex);
-//
-//          if (pointerId == mActivePointerId) {
-//            // This was our active pointer going up. Choose a new
-//            // active pointer and adjust accordingly.
-//            final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
-//            mLastTouchX = MotionEventCompat.getX(ev, newPointerIndex);
-//            mLastTouchY = MotionEventCompat.getY(ev, newPointerIndex);
-//            mActivePointerId = MotionEventCompat.getPointerId(ev, newPointerIndex);
-//          }
-//          break;
-//        }
-//      }
-//    }
-//    return true;
-//  }
-
-
   @Override
   public void onDraw(Canvas canvas) {
     setImageMatrix(drawMatrix);
@@ -299,21 +205,6 @@ public class LargeMapView extends ImageView {
           canvas.restore();
         }
       }
-    }
-
-    // Polygon test
-    {
-      Path path = new Path();
-      path.moveTo(321 * density, 62 * density);
-      path.lineTo(309 * density, 50 * density);
-      path.lineTo(318 * density, 41 * density);
-      path.lineTo(331 * density, 53 * density);
-      path.close();
-
-
-      Path transformedPath = new Path();
-      path.transform(drawMatrix, transformedPath);
-      //canvas.drawPath(transformedPath, paints.get(0));
     }
 
     pinBoundsList.clear();
@@ -419,37 +310,6 @@ public class LargeMapView extends ImageView {
     }
   }
 
-
-  private static class Polygon {
-    private int[] polyY, polyX;
-    private int polySides;
-
-    public Polygon(int[] px, int[] py, int ps) {
-      polyX = px;
-      polyY = py;
-      polySides = ps;
-    }
-
-    /**
-     * Checks if the Polygon contains a point.
-     *
-     * @param x Point horizontal pos.
-     * @param y Point vertical pos.
-     * @return Point is in Poly flag.
-     * @see "http://alienryderflex.com/polygon/"
-     */
-    public boolean contains(int x, int y) {
-      boolean c = false;
-      int i, j = 0;
-      for (i = 0, j = polySides - 1; i < polySides; j = i++) {
-        if (((polyY[i] > y) != (polyY[j] > y))
-            && (x < (polyX[j] - polyX[i]) * (y - polyY[i]) / (polyY[j] - polyY[i]) + polyX[i]))
-          c = !c;
-      }
-      return c;
-    }
-  }
-
   private static class PaintGallery {
     private final GalleryViewRect rect;
     private final Paint paint;
@@ -478,6 +338,8 @@ public class LargeMapView extends ImageView {
   // Borrowed from
   // http://stackoverflow.com/questions/19418878/implementing-pinch-zoom-and-drag-using-androids-build-in-gesture-listener-and-s
   private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+    float lastFocusX;
+    float lastFocusY;
 
     @Override
     public boolean onScaleBegin(ScaleGestureDetector detector) {
@@ -492,13 +354,9 @@ public class LargeMapView extends ImageView {
       float focusX = detector.getFocusX();
       float focusY = detector.getFocusY();
 
-      //Zoom focus is where the fingers are centered,
       transformationMatrix.postTranslate(-focusX, -focusY);
-
       transformationMatrix.postScale(detector.getScaleFactor(), detector.getScaleFactor());
 
-/* Adding focus shift to allow for scrolling with two pointers down. Remove it to skip this functionality. This could be done in fewer lines, but for clarity I do it this way here */
-      //Edited after comment by chochim
       float focusShiftX = focusX - lastFocusX;
       float focusShiftY = focusY - lastFocusY;
       transformationMatrix.postTranslate((focusX + focusShiftX), focusY + focusShiftY);
@@ -512,10 +370,12 @@ public class LargeMapView extends ImageView {
   }
 
   public class GestureListener extends GestureDetector.SimpleOnGestureListener {
+    private final float scrollSpeedMultipler = 1.5f;
+
     @Override
     public boolean onScroll(MotionEvent downEvent, MotionEvent currentEvent,
                             float distanceX, float distanceY) {
-      drawMatrix.postTranslate(-distanceX * 1.5f, -distanceY * 1.5f);
+      drawMatrix.postTranslate(-distanceX * scrollSpeedMultipler, -distanceY * scrollSpeedMultipler);
       invalidate();
       return true;
     }
