@@ -49,6 +49,7 @@ public class MapView extends ImageView {
   private ArrayList<Rect> pinBoundsList = new ArrayList<>();
   private ArrayList<ArtObjectLocation> locations = new ArrayList<>();
   private RectF initialLayoutRectF = new RectF();
+  private float[] initialLayoutValues = new float[9];
 
   private ScaleGestureDetector mScaleDetector;
   private GestureDetector gestureListener;
@@ -184,6 +185,7 @@ public class MapView extends ImageView {
       Drawable drawable = getDrawable();
       initialLayoutRectF.set(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
       zoomToRect(initialLayoutRectF);
+      drawMatrix.getValues(initialLayoutValues);
     }
   }
 
@@ -426,9 +428,10 @@ public class MapView extends ImageView {
       float[] drawMatrixValues = new float[9];
       drawMatrix.getValues(drawMatrixValues);
       float scale = drawMatrixValues[Matrix.MSCALE_X];
-      float low = 1.0f;
-      float med = 2.0f;
-      float high = 4.0f;
+
+      float low = initialLayoutValues[Matrix.MSCALE_X];
+      float med = low * 2.8f;
+      float high = med * 2.8f;
 
       float targetScale;
       if (scale < low) {
