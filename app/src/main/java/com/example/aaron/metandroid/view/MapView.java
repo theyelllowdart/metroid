@@ -432,5 +432,28 @@ public class MapView extends ImageView {
     gestureListener.onTouchEvent(event);
     return true;
   }
+
+  public void zoomToGallery(RectF galleryRect) {
+    RectF imageBounds = new RectF(0, 0, getWidth(), getHeight());
+    Matrix newMatrix = new Matrix();
+    float minSize = 100 * density;
+    float sizeX = Math.max(minSize, galleryRect.width());
+    float sizeY = Math.max(minSize, galleryRect.height());
+    RectF newViewPort = new RectF(
+        (galleryRect.centerX() - sizeX / 2),
+        (galleryRect.centerY() - sizeY / 2),
+        (galleryRect.centerX() + sizeX / 2),
+        (galleryRect.centerY() + sizeY / 2)
+    );
+    newMatrix.setRectToRect(newViewPort, imageBounds, Matrix.ScaleToFit.CENTER);
+
+//    Matrix originalInvertedMatrix = new Matrix();
+//    getImageMatrix().invert(originalInvertedMatrix);
+//    newMatrix.preConcat(originalInvertedMatrix);
+
+    drawMatrix = newMatrix;
+
+    invalidate();
+  }
 }
 

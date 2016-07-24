@@ -257,7 +257,8 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
           }
         }
 
-//        // Zoom to gallery on large map
+        mapView.zoomToGallery(rect.getScaled());
+        // Zoom to gallery on large map
 //        RectF imageBounds = new RectF(0, 0, largeMapPhotoView.getImageView().getWidth(), largeMapPhotoView.getImageView().getHeight());
 //        Matrix newMatrix = new Matrix();
 //        RectF galleryRect = rect.getScaled();
