@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid.model;
+package com.github.theyelllowdart.unofficialmetaudioguide.android.model;
 
 import android.graphics.RectF;
 

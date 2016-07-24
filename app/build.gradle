@@ -5,7 +5,7 @@ android {
   buildToolsVersion "22.0.1"
 
   defaultConfig {
-    applicationId "com.example.aaron.metandroid"
+    applicationId "com.github.theyelllowdart.unofficialmetaudioguide.android"
     vectorDrawables.useSupportLibrary = true
     minSdkVersion 21
     targetSdkVersion 22

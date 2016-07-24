@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid.fragment;
+package com.github.theyelllowdart.unofficialmetaudioguide.android.fragment;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -7,8 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.aaron.metandroid.R;
-import com.example.aaron.metandroid.model.StopModel;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.R;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.StopModel;
 
 public class ObjectMoveFragment extends Fragment {
 

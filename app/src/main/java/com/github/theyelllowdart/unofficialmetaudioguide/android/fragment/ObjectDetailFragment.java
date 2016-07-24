@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid.fragment;
+package com.github.theyelllowdart.unofficialmetaudioguide.android.fragment;
 
 import android.app.Activity;
 import android.app.ListFragment;
@@ -9,16 +9,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.example.aaron.metandroid.R;
-import com.example.aaron.metandroid.model.MediaModel;
-import com.example.aaron.metandroid.model.StopModel;
-import com.example.aaron.metandroid.util.CenterTopTranformation;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.R;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.MediaModel;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.StopModel;
 
 import java.util.List;
 

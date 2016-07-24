@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid.util;
+package com.github.theyelllowdart.unofficialmetaudioguide.android.util;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -6,9 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 
-import com.example.aaron.metandroid.R;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.R;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 

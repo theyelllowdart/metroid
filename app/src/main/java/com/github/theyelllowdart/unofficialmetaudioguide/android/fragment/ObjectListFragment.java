@@ -1,12 +1,8 @@
-package com.example.aaron.metandroid.fragment;
+package com.github.theyelllowdart.unofficialmetaudioguide.android.fragment;
 
 import android.app.Activity;
 import android.app.ListFragment;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,13 +15,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
-import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
-import com.example.aaron.metandroid.R;
-import com.example.aaron.metandroid.model.ArtObjectRow;
-import com.example.aaron.metandroid.model.StopModel;
-import com.example.aaron.metandroid.util.CenterTopTranformation;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.R;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.ArtObjectRow;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.StopModel;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.util.CenterTopTranformation;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid.util;
+package com.github.theyelllowdart.unofficialmetaudioguide.android.util;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -9,7 +9,6 @@ import android.graphics.Paint;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapTransformation;
 import com.bumptech.glide.load.resource.bitmap.TransformationUtils;
-import com.example.aaron.metandroid.model.StopModel;
 
 public class CenterTopTranformation extends BitmapTransformation {
 

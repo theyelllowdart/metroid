@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid.fragment;
+package com.github.theyelllowdart.unofficialmetaudioguide.android.fragment;
 
 import android.app.Activity;
 import android.database.Cursor;
@@ -10,16 +10,16 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.example.aaron.metandroid.MyApplication;
-import com.example.aaron.metandroid.R;
-import com.example.aaron.metandroid.model.ArtObjectLocation;
-import com.example.aaron.metandroid.model.ArtObjectRow;
-import com.example.aaron.metandroid.model.GalleryViewRect;
-import com.example.aaron.metandroid.model.MediaModel;
-import com.example.aaron.metandroid.model.QueryModel;
-import com.example.aaron.metandroid.model.StopModel;
-import com.example.aaron.metandroid.util.FeedReaderDbHelper;
-import com.example.aaron.metandroid.view.MapView;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.MyApplication;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.R;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.ArtObjectLocation;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.ArtObjectRow;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.GalleryViewRect;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.MediaModel;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.QueryModel;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.StopModel;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.util.FeedReaderDbHelper;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.view.MapView;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 

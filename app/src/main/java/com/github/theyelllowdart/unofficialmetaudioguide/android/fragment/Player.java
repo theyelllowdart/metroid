@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid.fragment;
+package com.github.theyelllowdart.unofficialmetaudioguide.android.fragment;
 
 import android.content.Context;
 import android.media.AudioManager;
@@ -12,7 +12,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.aaron.metandroid.model.MediaModel;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.MediaModel;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -1,9 +1,10 @@
-package com.example.aaron.metandroid;
+package com.github.theyelllowdart.unofficialmetaudioguide.android;
 
 import android.app.Application;
 
-import com.example.aaron.metandroid.model.GalleryLabel;
-import com.example.aaron.metandroid.model.GalleryViewRect;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.R;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.GalleryLabel;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.GalleryViewRect;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

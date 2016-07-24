@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid.experimental;
+package com.github.theyelllowdart.unofficialmetaudioguide.android.experimental;
 
 import android.graphics.drawable.VectorDrawable;
 

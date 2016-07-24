@@ -8,9 +8,9 @@
               android:paddingLeft="@dimen/activity_horizontal_margin"
               android:paddingRight="@dimen/activity_horizontal_margin"
               android:paddingTop="@dimen/activity_vertical_margin"
-              tools:context=".fragment.MapActivity">
+              tools:context="com.github.theyelllowdart.unofficialmetaudioguide.android.fragment.MapActivity">
 
-  <com.example.aaron.metandroid.view.MapView
+  <com.github.theyelllowdart.unofficialmetaudioguide.android.view.MapView
     android:id="@+id/map"
     android:layout_width="match_parent"
     android:background="#F9FFE9"

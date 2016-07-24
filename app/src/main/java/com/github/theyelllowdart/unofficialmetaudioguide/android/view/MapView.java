@@ -1,4 +1,4 @@
-package com.example.aaron.metandroid.view;
+package com.github.theyelllowdart.unofficialmetaudioguide.android.view;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -17,12 +17,12 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.widget.ImageView;
 
-import com.example.aaron.metandroid.MyApplication;
-import com.example.aaron.metandroid.R;
-import com.example.aaron.metandroid.model.ArtObjectLocation;
-import com.example.aaron.metandroid.model.GalleryLabel;
-import com.example.aaron.metandroid.model.GalleryViewRect;
-import com.example.aaron.metandroid.model.StopModel;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.MyApplication;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.R;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.ArtObjectLocation;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.GalleryLabel;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.GalleryViewRect;
+import com.github.theyelllowdart.unofficialmetaudioguide.android.model.StopModel;
 
 import java.io.IOException;
 import java.util.ArrayList;
