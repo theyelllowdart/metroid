@@ -28,7 +28,7 @@ import com.example.aaron.metandroid.util.FeedReaderDbHelper;
 import com.example.aaron.metandroid.model.GalleryViewRect;
 import com.example.aaron.metandroid.model.QueryModel;
 import com.example.aaron.metandroid.model.StopModel;
-import com.example.aaron.metandroid.view.LargeMapView;
+import com.example.aaron.metandroid.view.MapView;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Iterables;
 
@@ -44,14 +44,14 @@ import uk.co.senab.photoview.PhotoViewAttacher;
 
 public class MapActivity extends Activity implements ObjectListFragment.OnObjectSelectListener,
     ObjectDetailFragment.OnMediaSelectListener, ObjectDetailFragment.OnMoveSelectListener,
-    ObjectMoveFragment.OnExitMoveModeListener, MapFragment.OnPinSelectListener, MapFragment.OnMapSelectListener {
+    ObjectMoveFragment.OnExitMoveModeListener, MapView.OnPinSelectListener, MapView.OnMapSelectListener {
 
   private Float density;
   private MyPlayer myPlayer;
   private PhotoViewAttacher largeMapPhotoView;
   private ListView galleriesView;
 //  private TextView galleryHeader;
-  private LargeMapView largeMapView;
+  private MapView mapView;
   private Matrix originalMapMatrix;
   private LinearLayout galleryDetail;
   private LinearLayout moveButtons;
@@ -92,7 +92,7 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
 
   @Override
   public void onMediaSelected(StopModel model, int pinNumber) {
-    largeMapView.setPinToPlace(pinNumber);
+    mapView.setPinToPlace(pinNumber);
     mainActivity
         .getFragmentManager()
         .beginTransaction()
@@ -103,7 +103,7 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
 
   @Override
   public void onExitMoveMode() {
-    largeMapView.clearPinToPlace();
+    mapView.clearPinToPlace();
   }
 
   @Override
@@ -120,19 +120,17 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
 
   @Override
   public void onMapSelected(float x, float y) {
-    if (largeMapView.getPinToPlace() != null) {
-      return;
-    }
-
-    Matrix matrix = new Matrix();
-    largeMapPhotoView.getDisplayMatrix().invert(matrix);
+//    Matrix matrix = new Matrix();
+//    largeMapPhotoView.getDisplayMatrix().invert(matrix);
     float[] coordinates = new float[]{x, y};
-    matrix.mapPoints(coordinates);
+//    matrix.mapPoints(coordinates);
     Log.i("tag", coordinates[0] / density + " " + coordinates[1] / density);
+
 
 
     for (GalleryViewRect rect : MyApplication.galleryRectById.values()) {
       if (rect.contains(coordinates[0], coordinates[1])) {
+        mapView.clearPins();
         final int gallery = rect.getId();
         SQLiteDatabase db = new FeedReaderDbHelper(getApplicationContext()).getReadableDatabase();
         try (Cursor c = db.rawQuery(
@@ -260,29 +258,33 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
                 }
                 pins.add(new ArtObjectLocation(s.getArtObjectId(), i + 1, point.x, point.y));
               }
-              largeMapView.setPins(pins);
+              mapView.setPins(pins);
+//              MapFragment fragment = (MapFragment) mainActivity
+//                  .getFragmentManager()
+//                  .findFragmentById(R.id.mapFragment);
+//              fragment.setPins(pins);
             }
           }
         }
 
-        // Zoom to gallery on large map
-        RectF imageBounds = new RectF(0, 0, largeMapPhotoView.getImageView().getWidth(), largeMapPhotoView.getImageView().getHeight());
-        Matrix newMatrix = new Matrix();
-        RectF galleryRect = rect.getScaled();
-        float minSize = 100 * density;
-        float sizeX = Math.max(minSize, galleryRect.width());
-        float sizeY = Math.max(minSize, galleryRect.height());
-        RectF newViewPort = new RectF(
-            (galleryRect.centerX() - sizeX / 2),
-            (galleryRect.centerY() - sizeY / 2),
-            (galleryRect.centerX() + sizeX / 2),
-            (galleryRect.centerY() + sizeY / 2)
-        );
-        newMatrix.setRectToRect(newViewPort, imageBounds, Matrix.ScaleToFit.CENTER);
-        Matrix originalInvertedMatrix = new Matrix();
-        originalMapMatrix.invert(originalInvertedMatrix);
-        newMatrix.preConcat(originalInvertedMatrix);
-        largeMapPhotoView.setDisplayMatrix(newMatrix);
+//        // Zoom to gallery on large map
+//        RectF imageBounds = new RectF(0, 0, largeMapPhotoView.getImageView().getWidth(), largeMapPhotoView.getImageView().getHeight());
+//        Matrix newMatrix = new Matrix();
+//        RectF galleryRect = rect.getScaled();
+//        float minSize = 100 * density;
+//        float sizeX = Math.max(minSize, galleryRect.width());
+//        float sizeY = Math.max(minSize, galleryRect.height());
+//        RectF newViewPort = new RectF(
+//            (galleryRect.centerX() - sizeX / 2),
+//            (galleryRect.centerY() - sizeY / 2),
+//            (galleryRect.centerX() + sizeX / 2),
+//            (galleryRect.centerY() + sizeY / 2)
+//        );
+//        newMatrix.setRectToRect(newViewPort, imageBounds, Matrix.ScaleToFit.CENTER);
+//        Matrix originalInvertedMatrix = new Matrix();
+//        originalMapMatrix.invert(originalInvertedMatrix);
+//        newMatrix.preConcat(originalInvertedMatrix);
+//        largeMapPhotoView.setDisplayMatrix(newMatrix);
       }
     }
   }
@@ -318,6 +320,8 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
         (TextView) findViewById(R.id.time),
         (TextView) findViewById(R.id.audioTitle)
     );
+
+    mapView = (MapView) findViewById(R.id.map);
 
 //    largeMapView = (LargeMapView) findViewById(R.id.largeMap);
 //    largeMapPhotoView = new MyPhotoViewAttacher(largeMapView);
@@ -357,7 +361,7 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
     @Override
     public void onViewTap(View view, float v, float v1) {
 //      addStopView.setVisibility(View.VISIBLE);
-      if (largeMapView.getPinToPlace() != null) {
+      if (mapView.getPinToPlace() != null) {
         return;
       }
       Matrix matrix = new Matrix();
@@ -366,7 +370,7 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
       matrix.mapPoints(coordinates);
       Log.i("tag", coordinates[0] / density + " " + coordinates[1] / density);
 
-      Integer pinPosition = largeMapView.getPin(coordinates[0], coordinates[1]);
+      Integer pinPosition = mapView.getPin(coordinates[0], coordinates[1]);
       if (pinPosition != null) {
         Object fragment = mainActivity
             .getFragmentManager()
@@ -514,7 +518,7 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
                   }
                   pins.add(new ArtObjectLocation(s.getArtObjectId(), i + 1, point.x, point.y));
                 }
-                largeMapView.setPins(pins);
+                mapView.setPins(pins);
               }
             }
           }

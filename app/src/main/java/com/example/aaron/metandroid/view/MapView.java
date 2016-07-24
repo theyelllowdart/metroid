@@ -11,7 +11,6 @@ import android.graphics.RectF;
 import android.graphics.drawable.VectorDrawable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -22,11 +21,12 @@ import com.example.aaron.metandroid.R;
 import com.example.aaron.metandroid.model.ArtObjectLocation;
 import com.example.aaron.metandroid.model.GalleryLabel;
 import com.example.aaron.metandroid.model.GalleryViewRect;
+import com.example.aaron.metandroid.model.StopModel;
 
 import java.io.IOException;
 import java.util.*;
 
-public class LargeMapView extends ImageView {
+public class MapView extends ImageView {
   private final float density;
   private final ArrayList<PaintGallery> paintRecs = new ArrayList<>();
   private final Paint textPaint;
@@ -50,9 +50,15 @@ public class LargeMapView extends ImageView {
   private GestureDetector gestureListener;
   private Matrix drawMatrix = new Matrix();
 
+  private OnPinSelectListener pinSelectListener;
+  private OnMapSelectListener mapSelectListener;
 
-  public LargeMapView(Context context, AttributeSet attrs) throws IOException {
+
+  public MapView(Context context, AttributeSet attrs) throws IOException {
     super(context, attrs);
+
+    pinSelectListener = (OnPinSelectListener) context;
+    mapSelectListener = (OnMapSelectListener) context;
 
     density = getResources().getDisplayMetrics().density;
     mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
@@ -78,6 +84,14 @@ public class LargeMapView extends ImageView {
     }
 
     this.pinDrawable = (VectorDrawable) getResources().getDrawable(R.drawable.pin, null);
+  }
+
+  public interface OnPinSelectListener {
+    void onPinSelected(StopModel model, int pinNumber);
+  }
+
+  public interface OnMapSelectListener {
+    void onMapSelected(float x, float y);
   }
 
   private class DrawPin {
@@ -377,7 +391,11 @@ public class LargeMapView extends ImageView {
 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
-      Log.i("onSingleTap :", "" + e.getX() + "," + e.getY());
+      Matrix inverse = new Matrix();
+      getImageMatrix().invert(inverse);
+      float[] absolutePoints = new float[]{e.getX(), e.getY()};
+      inverse.mapPoints(absolutePoints);
+      mapSelectListener.onMapSelected(absolutePoints[0], absolutePoints[1]);
       return true;
     }
 
@@ -391,7 +409,7 @@ public class LargeMapView extends ImageView {
       float high = 4.0f;
 
       float targetScale;
-      if (scale < low){
+      if (scale < low) {
         targetScale = low;
       } else if (scale < med) {
         targetScale = med;
