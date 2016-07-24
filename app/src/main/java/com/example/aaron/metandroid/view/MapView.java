@@ -391,11 +391,20 @@ public class MapView extends ImageView {
 
     @Override
     public boolean onSingleTapConfirmed(MotionEvent e) {
-      Matrix inverse = new Matrix();
-      getImageMatrix().invert(inverse);
-      float[] absolutePoints = new float[]{e.getX(), e.getY()};
-      inverse.mapPoints(absolutePoints);
-      mapSelectListener.onMapSelected(absolutePoints[0], absolutePoints[1]);
+      if (pinToPlace == null) {
+        Matrix inverse = new Matrix();
+        getImageMatrix().invert(inverse);
+        float[] absolutePoints = new float[]{e.getX(), e.getY()};
+        inverse.mapPoints(absolutePoints);
+        float x = absolutePoints[0];
+        float y = absolutePoints[1];
+        Integer selectedPin = getPin(x, y);
+        if (selectedPin != null) {
+          pinSelectListener.onPinSelected(null, selectedPin);
+        } else {
+          mapSelectListener.onMapSelected(x, y);
+        }
+      }
       return true;
     }
 
