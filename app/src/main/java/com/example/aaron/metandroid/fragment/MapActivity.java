@@ -36,7 +36,7 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
     ObjectMoveFragment.OnExitMoveModeListener, MapView.OnPinSelectListener, MapView.OnMapSelectListener {
 
   private Float density;
-  private MyPlayer myPlayer;
+  private Player player;
   private MapView mapView;
   private Activity mainActivity;
 
@@ -47,7 +47,7 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
 
     density = getResources().getDisplayMetrics().density;
 
-    myPlayer = new MyPlayer(
+    player = new Player(
         getBaseContext(),
         (SeekBar) findViewById(R.id.seek),
         (Button) findViewById(R.id.play),
@@ -84,7 +84,7 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
       } else {
         queue = new ArrayList<>();
       }
-      myPlayer.play(model.getUri(), model.getTitle(), queue);
+      player.play(model.getUri(), model.getTitle(), queue);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

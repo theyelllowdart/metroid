@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class MyPlayer {
+public class Player {
   final private static int PROGRESS_UPDATE_MS = 100;
 
   final private Context context;
@@ -31,7 +31,7 @@ public class MyPlayer {
   private MediaPlayer masterMediaPlayer;
   private Boolean isSeekBarDragging = false;
 
-  public MyPlayer(Context context, SeekBar seekBar, Button playButton, final TextView timeView, TextView titleView) {
+  public Player(Context context, SeekBar seekBar, Button playButton, final TextView timeView, TextView titleView) {
     this.context = context;
     this.seekBar = seekBar;
     this.playButton = playButton;
