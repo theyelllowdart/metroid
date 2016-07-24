@@ -1,24 +1,20 @@
 package com.example.aaron.metandroid.view;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.VectorDrawable;
-import android.support.v4.view.MotionEventCompat;
 import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
-import android.view.View;
 import android.widget.ImageView;
 
 import com.example.aaron.metandroid.MyApplication;
@@ -370,12 +366,11 @@ public class LargeMapView extends ImageView {
   }
 
   public class GestureListener extends GestureDetector.SimpleOnGestureListener {
-    private final float scrollSpeedMultipler = 1.5f;
-
     @Override
     public boolean onScroll(MotionEvent downEvent, MotionEvent currentEvent,
                             float distanceX, float distanceY) {
-      drawMatrix.postTranslate(-distanceX * scrollSpeedMultipler, -distanceY * scrollSpeedMultipler);
+      float speedMultiplier = 1.5f;
+      drawMatrix.postTranslate(-distanceX * speedMultiplier, -distanceY * speedMultiplier);
       invalidate();
       return true;
     }
@@ -388,7 +383,27 @@ public class LargeMapView extends ImageView {
 
     @Override
     public boolean onDoubleTap(MotionEvent e) {
-      Log.i("doubleSingleTap :", "" + e.getX() + "," + e.getY());
+      float[] drawMatrixValues = new float[9];
+      drawMatrix.getValues(drawMatrixValues);
+      float scale = drawMatrixValues[Matrix.MSCALE_X];
+      float low = 1.0f;
+      float med = 2.0f;
+      float high = 3.0f;
+
+      float targetScale;
+      if (scale < low){
+        targetScale = low;
+      } else if (scale < med) {
+        targetScale = med;
+      } else if (scale < high) {
+        targetScale = high;
+      } else {
+        targetScale = low;
+      }
+
+      float postScaleRatio = targetScale / scale;
+      drawMatrix.postScale(postScaleRatio, postScaleRatio, e.getX(), e.getY());
+      invalidate();
       return true;
     }
   }
