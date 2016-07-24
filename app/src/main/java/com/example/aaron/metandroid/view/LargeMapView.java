@@ -388,7 +388,7 @@ public class LargeMapView extends ImageView {
       float scale = drawMatrixValues[Matrix.MSCALE_X];
       float low = 1.0f;
       float med = 2.0f;
-      float high = 3.0f;
+      float high = 4.0f;
 
       float targetScale;
       if (scale < low){
