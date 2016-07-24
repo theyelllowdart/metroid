@@ -434,25 +434,20 @@ public class MapView extends ImageView {
   }
 
   public void zoomToGallery(RectF galleryRect) {
-    RectF imageBounds = new RectF(0, 0, getWidth(), getHeight());
+    RectF imageSize = new RectF(0, 0, getWidth(), getHeight());
     Matrix newMatrix = new Matrix();
     float minSize = 100 * density;
-    float sizeX = Math.max(minSize, galleryRect.width());
-    float sizeY = Math.max(minSize, galleryRect.height());
+    float padding = 10 * density;
+    float sizeX = Math.max(minSize, galleryRect.width() + padding);
+    float sizeY = Math.max(minSize, galleryRect.height() + padding);
     RectF newViewPort = new RectF(
         (galleryRect.centerX() - sizeX / 2),
         (galleryRect.centerY() - sizeY / 2),
         (galleryRect.centerX() + sizeX / 2),
         (galleryRect.centerY() + sizeY / 2)
     );
-    newMatrix.setRectToRect(newViewPort, imageBounds, Matrix.ScaleToFit.CENTER);
-
-//    Matrix originalInvertedMatrix = new Matrix();
-//    getImageMatrix().invert(originalInvertedMatrix);
-//    newMatrix.preConcat(originalInvertedMatrix);
-
+    newMatrix.setRectToRect(newViewPort, imageSize, Matrix.ScaleToFit.CENTER);
     drawMatrix = newMatrix;
-
     invalidate();
   }
 }
