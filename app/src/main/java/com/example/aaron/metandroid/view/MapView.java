@@ -25,7 +25,9 @@ import com.example.aaron.metandroid.model.GalleryViewRect;
 import com.example.aaron.metandroid.model.StopModel;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class MapView extends ImageView {
   private final float density;
