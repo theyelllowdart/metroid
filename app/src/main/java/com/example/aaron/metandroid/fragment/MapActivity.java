@@ -50,7 +50,7 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
   private MyPlayer myPlayer;
   private PhotoViewAttacher largeMapPhotoView;
   private ListView galleriesView;
-//  private TextView galleryHeader;
+  //  private TextView galleryHeader;
   private MapView mapView;
   private Matrix originalMapMatrix;
   private LinearLayout galleryDetail;
@@ -120,13 +120,8 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
 
   @Override
   public void onMapSelected(float x, float y) {
-//    Matrix matrix = new Matrix();
-//    largeMapPhotoView.getDisplayMatrix().invert(matrix);
     float[] coordinates = new float[]{x, y};
-//    matrix.mapPoints(coordinates);
-    Log.i("tag", coordinates[0] / density + " " + coordinates[1] / density);
-
-
+    Log.i("tag", x / density + " " + y / density);
 
     for (GalleryViewRect rect : MyApplication.galleryRectById.values()) {
       if (rect.contains(coordinates[0], coordinates[1])) {
@@ -223,11 +218,6 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
               .beginTransaction()
               .replace(R.id.fragment_container, ObjectListFragment.create(gallery, rows))
               .commit();
-
-//            Collections.sort(stopModels);
-//            galleryAdapter.addAll(rows);
-//            galleriesView.setSelection(0);
-
 
           // Find pin Locations
           HashSet<String> artObjectIds = new HashSet<>();
