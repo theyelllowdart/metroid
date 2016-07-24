@@ -4,27 +4,27 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class MediaModel implements Parcelable {
-    private final String title;
-    private final String uri;
-    private final int stop;
+  private final String title;
+  private final String uri;
+  private final int stop;
 
-    public String getTitle() {
-        return title;
-    }
+  public String getTitle() {
+    return title;
+  }
 
-    public String getUri() {
-        return uri;
-    }
+  public String getUri() {
+    return uri;
+  }
 
-    public int getStop() {
-        return stop;
-    }
+  public int getStop() {
+    return stop;
+  }
 
-    public MediaModel(String title, String uri, int stop) {
-        this.title = title;
-        this.uri = uri;
-        this.stop = stop;
-    }
+  public MediaModel(String title, String uri, int stop) {
+    this.title = title;
+    this.uri = uri;
+    this.stop = stop;
+  }
 
 
   @Override

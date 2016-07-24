@@ -53,30 +53,30 @@ public class FeedReaderDbHelper extends SQLiteOpenHelper {
           new InputStreamReader(context.getResources().openRawResource(R.raw.met_public_processed_stop)), ',', '"', 1)) {
         String[] matches;
         while ((matches = reader.readNext()) != null) {
-            ContentValues values = new ContentValues();
-            values.put("id", matches[0]);
-            values.put("objectId", matches[1]);
-            values.put("title", matches[2]);
-            values.put("gallery", matches[3]);
-            values.put("image", matches[4]);
-            values.put("width", matches[5]);
-            values.put("height", matches[6]);
-            db.insert("processed_stop", null, values);
+          ContentValues values = new ContentValues();
+          values.put("id", matches[0]);
+          values.put("objectId", matches[1]);
+          values.put("title", matches[2]);
+          values.put("gallery", matches[3]);
+          values.put("image", matches[4]);
+          values.put("width", matches[5]);
+          values.put("height", matches[6]);
+          db.insert("processed_stop", null, values);
         }
       }
       try (CSVReader reader = new CSVReader(
           new InputStreamReader(context.getResources().openRawResource(R.raw.met_public_processed_media)))) {
         String[] matches;
         while ((matches = reader.readNext()) != null) {
-            ContentValues values = new ContentValues();
-            values.put("id", matches[0]);
-            values.put("stop", matches[1]);
-            values.put("position", matches[2]);
-            values.put("title", matches[3]);
-            if (matches.length == 5) {
-              values.put("uri", matches[4]);
-            }
-            db.insert("processed_media", null, values);
+          ContentValues values = new ContentValues();
+          values.put("id", matches[0]);
+          values.put("stop", matches[1]);
+          values.put("position", matches[2]);
+          values.put("title", matches[3]);
+          if (matches.length == 5) {
+            values.put("uri", matches[4]);
+          }
+          db.insert("processed_media", null, values);
         }
       }
       try (CSVReader reader = new CSVReader(
