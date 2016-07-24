@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
@@ -45,6 +46,7 @@ public class MapView extends ImageView {
   private PointF pinLocation = new PointF();
   private ArrayList<Rect> pinBoundsList = new ArrayList<>();
   private ArrayList<ArtObjectLocation> locations = new ArrayList<>();
+  private RectF initialLayoutRectF = new RectF();
 
   private ScaleGestureDetector mScaleDetector;
   private GestureDetector gestureListener;
@@ -129,9 +131,9 @@ public class MapView extends ImageView {
     for (ArtObjectLocation location : locations) {
       float halfPinSize = 5 * density;
       RectF rect = new RectF(
-          location.getX() - halfPinSize,
-          location.getY() - (2 * halfPinSize),
-          location.getX() + halfPinSize, location.getY()
+        location.getX() - halfPinSize,
+        location.getY() - (2 * halfPinSize),
+        location.getX() + halfPinSize, location.getY()
       );
       this.pins.add(new DrawPin(location.getPosition(), rect));
     }
@@ -175,6 +177,15 @@ public class MapView extends ImageView {
   }
 
   @Override
+  protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+    if (changed) {
+      Drawable drawable = getDrawable();
+      initialLayoutRectF.set(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+      zoomToRect(initialLayoutRectF);
+    }
+  }
+
+  @Override
   public void onDraw(Canvas canvas) {
     setImageMatrix(drawMatrix);
 
@@ -202,7 +213,7 @@ public class MapView extends ImageView {
       drawMatrix.mapRect(galleryBoundsDest, scaled);
 
       if (RectF.intersects(galleryBoundsDest, clipBoundsF)) {
-        canvas.drawRect(galleryBoundsDest, paint);
+//        canvas.drawRect(galleryBoundsDest, paint);
 
         if (label.isHorizontal()) {
           horizontalTextMatrix.mapPoints(galleryTextDest, label.getCoord());
@@ -290,10 +301,10 @@ public class MapView extends ImageView {
       canvas.save();
       canvas.rotate(l.rotation, l.rotationX, l.rotationY);
       canvas.drawText(
-          l.title,
-          l.x,
-          l.y,
-          l.paint
+        l.title,
+        l.x,
+        l.y,
+        l.paint
       );
       canvas.restore();
     }
@@ -442,18 +453,18 @@ public class MapView extends ImageView {
     return true;
   }
 
-  public void zoomToGallery(RectF galleryRect) {
+  public void zoomToRect(RectF zoomCover) {
     RectF imageSize = new RectF(0, 0, getWidth(), getHeight());
     Matrix newMatrix = new Matrix();
     float minSize = 100 * density;
     float padding = 10 * density;
-    float sizeX = Math.max(minSize, galleryRect.width() + padding);
-    float sizeY = Math.max(minSize, galleryRect.height() + padding);
+    float sizeX = Math.max(minSize, zoomCover.width() + padding);
+    float sizeY = Math.max(minSize, zoomCover.height() + padding);
     RectF newViewPort = new RectF(
-        (galleryRect.centerX() - sizeX / 2),
-        (galleryRect.centerY() - sizeY / 2),
-        (galleryRect.centerX() + sizeX / 2),
-        (galleryRect.centerY() + sizeY / 2)
+      (zoomCover.centerX() - sizeX / 2),
+      (zoomCover.centerY() - sizeY / 2),
+      (zoomCover.centerX() + sizeX / 2),
+      (zoomCover.centerY() + sizeY / 2)
     );
     newMatrix.setRectToRect(newViewPort, imageSize, Matrix.ScaleToFit.CENTER);
     drawMatrix = newMatrix;

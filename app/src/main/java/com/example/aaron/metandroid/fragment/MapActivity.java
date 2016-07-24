@@ -253,7 +253,7 @@ public class MapActivity extends Activity implements ObjectListFragment.OnObject
           }
         }
 
-        mapView.zoomToGallery(rect.getScaled());
+        mapView.zoomToRect(rect.getScaled());
       }
     }
   }
